@@ -13,7 +13,8 @@ import {
   Chip,
   IconButton,
   CircularProgress,
-  Box
+  Box,
+  TableSortLabel
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import TicketForm from './TicketForm';
@@ -26,6 +27,10 @@ const TicketList = () => {
   const [currentTicket, setCurrentTicket] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  
+  // Sorting state
+  const [orderBy, setOrderBy] = useState('updatedAt');
+  const [order, setOrder] = useState('desc');
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -57,7 +62,6 @@ const TicketList = () => {
     try {
       await deleteTicket(id);
       setTickets(tickets.filter(ticket => ticket.id !== id));
-      // If we're viewing the deleted ticket, go back to list
       if (selectedTicket && selectedTicket.id === id) {
         setSelectedTicket(null);
       }
@@ -73,11 +77,45 @@ const TicketList = () => {
         : [ticket, ...prevTickets]
     );
     setFormOpen(false);
-    // If we're viewing the edited ticket, update the detail view
     if (selectedTicket && selectedTicket.id === ticket.id) {
       setSelectedTicket(ticket);
     }
   };
+
+  const handleSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const sortedTickets = React.useMemo(() => {
+    return [...tickets].sort((a, b) => {
+      // Custom sorting for status
+      if (orderBy === 'status') {
+        const statusOrder = { 'OPEN': 1, 'IN_PROGRESS': 2, 'RESOLVED': 3 };
+        const aValue = statusOrder[a.status];
+        const bValue = statusOrder[b.status];
+        return order === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      // Custom sorting for priority
+      if (orderBy === 'priority') {
+        const priorityOrder = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3 };
+        const aValue = priorityOrder[a.priority];
+        const bValue = priorityOrder[b.priority];
+        return order === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      // Default sorting for other fields
+      if (a[orderBy] < b[orderBy]) {
+        return order === 'asc' ? -1 : 1;
+      }
+      if (a[orderBy] > b[orderBy]) {
+        return order === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [tickets, orderBy, order]);
 
   if (loading) {
     return (
@@ -118,17 +156,59 @@ const TicketList = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Title</TableCell>
-                <TableCell>Assigned To</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Priority</TableCell>
-                <TableCell>Updated At</TableCell>
+                <TableCell sortDirection={orderBy === 'id' ? order : false}>
+                  <TableSortLabel
+                    active={orderBy === 'id'}
+                    direction={orderBy === 'id' ? order : 'asc'}
+                    onClick={() => handleSort('id')}
+                  >
+                    ID
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  Title
+                </TableCell>
+                <TableCell sortDirection={orderBy === 'agentId' ? order : false}>
+                  <TableSortLabel
+                    active={orderBy === 'agentId'}
+                    direction={orderBy === 'agentId' ? order : 'asc'}
+                    onClick={() => handleSort('agentId')}
+                  >
+                    Assigned To
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sortDirection={orderBy === 'status' ? order : false}>
+                  <TableSortLabel
+                    active={orderBy === 'status'}
+                    direction={orderBy === 'status' ? order : 'asc'}
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sortDirection={orderBy === 'priority' ? order : false}>
+                  <TableSortLabel
+                    active={orderBy === 'priority'}
+                    direction={orderBy === 'priority' ? order : 'asc'}
+                    onClick={() => handleSort('priority')}
+                  >
+                    Priority
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell sortDirection={orderBy === 'updatedAt' ? order : false}>
+                  <TableSortLabel
+                    active={orderBy === 'updatedAt'}
+                    direction={orderBy === 'updatedAt' ? order : 'desc'}
+                    onClick={() => handleSort('updatedAt')}
+                  >
+                    Updated At
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {tickets.map(ticket => (
+              {sortedTickets.map(ticket => (
                 <TableRow key={ticket.id}>
                   <TableCell>{ticket.id}</TableCell>
                   <TableCell>
@@ -162,7 +242,15 @@ const TicketList = () => {
                       size="small"
                     />
                   </TableCell>
-                  <TableCell>{new Date(ticket.updatedAt).toLocaleString()}</TableCell>
+                  <TableCell>
+                    {new Date(ticket.updatedAt).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </TableCell>
                   <TableCell align="right">
                     <IconButton
                       onClick={() => {
