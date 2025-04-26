@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTickets, deleteTicket } from '../services/ticketService';
+import { getTickets, getTicket, deleteTicket } from '../services/ticketService';
 import {
   Table,
   TableBody,
@@ -17,12 +17,15 @@ import {
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import TicketForm from './TicketForm';
+import TicketDetail from './TicketDetail';
 
 const TicketList = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -38,10 +41,26 @@ const TicketList = () => {
     fetchTickets();
   }, []);
 
+  const handleTitleClick = async (id) => {
+    try {
+      setDetailLoading(true);
+      const ticket = await getTicket(id);
+      setSelectedTicket(ticket);
+    } catch (error) {
+      console.error('Error loading ticket details:', error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await deleteTicket(id);
       setTickets(tickets.filter(ticket => ticket.id !== id));
+      // If we're viewing the deleted ticket, go back to list
+      if (selectedTicket && selectedTicket.id === id) {
+        setSelectedTicket(null);
+      }
     } catch (error) {
       console.error('Error deleting ticket:', error);
     }
@@ -54,6 +73,10 @@ const TicketList = () => {
         : [ticket, ...prevTickets]
     );
     setFormOpen(false);
+    // If we're viewing the edited ticket, update the detail view
+    if (selectedTicket && selectedTicket.id === ticket.id) {
+      setSelectedTicket(ticket);
+    }
   };
 
   if (loading) {
@@ -61,6 +84,15 @@ const TicketList = () => {
       <Box display="flex" justifyContent="center" mt={4}>
         <CircularProgress />
       </Box>
+    );
+  }
+
+  if (selectedTicket) {
+    return (
+      <TicketDetail 
+        ticket={selectedTicket} 
+        onBack={() => setSelectedTicket(null)}
+      />
     );
   }
 
@@ -99,7 +131,14 @@ const TicketList = () => {
               {tickets.map(ticket => (
                 <TableRow key={ticket.id}>
                   <TableCell>{ticket.id}</TableCell>
-                  <TableCell>{ticket.title}</TableCell>
+                  <TableCell>
+                    <Button 
+                      onClick={() => handleTitleClick(ticket.id)}
+                      sx={{ textTransform: 'none', p: 0 }}
+                    >
+                      {ticket.title}
+                    </Button>
+                  </TableCell>
                   <TableCell>{ticket.agentId || 'Unassigned'}</TableCell>
                   <TableCell>
                     <Chip 

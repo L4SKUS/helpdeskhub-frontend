@@ -7,9 +7,20 @@ import {
   Chip,
   Divider 
 } from '@mui/material';
-import { format } from 'date-fns';
 
 const TicketDetail = ({ ticket, onBack }) => {
+  // Format date without date-fns
+  const formatDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 3, m: 2 }}>
       <Button 
@@ -51,10 +62,10 @@ const TicketDetail = ({ ticket, onBack }) => {
       
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography variant="caption">
-          Created: {format(new Date(ticket.createdAt), 'PPpp')}
+          Created: {formatDate(ticket.createdAt)}
         </Typography>
         <Typography variant="caption">
-          Last updated: {format(new Date(ticket.updatedAt), 'PPpp')}
+          Last updated: {formatDate(ticket.updatedAt)}
         </Typography>
       </Box>
       
