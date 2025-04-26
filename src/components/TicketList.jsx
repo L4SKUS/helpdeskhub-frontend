@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getTickets, deleteTicket } from '../services/ticketService';
 import {
-  List,
-  ListItem,
-  ListItemText,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Button,
   Paper,
   Typography,
@@ -76,70 +79,75 @@ const TicketList = () => {
         </Button>
       </Box>
 
-      <List>
-        {tickets.length === 0 ? (
-          <Typography sx={{ p: 2 }}>No tickets found</Typography>
-        ) : (
-          tickets.map(ticket => (
-            <ListItem 
-              key={ticket.id} 
-              divider
-              secondaryAction={
-                <>
-                  <IconButton
-                    edge="end"
-                    onClick={() => {
-                      setCurrentTicket(ticket);
-                      setFormOpen(true);
-                    }}
-                    sx={{ mr: 1 }}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    edge="end"
-                    onClick={() => handleDelete(ticket.id)}
-                  >
-                    <Delete />
-                  </IconButton>
-                </>
-              }
-            >
-              <ListItemText
-                primary={ticket.title}
-                secondary={
-                  <>
-                    <Box component="span" display="block">
-                      Status: <Chip 
-                        label={ticket.status} 
-                        size="small"
-                        color={
-                          ticket.status === 'OPEN' ? 'primary' :
-                          ticket.status === 'IN_PROGRESS' ? 'warning' : 'success'
-                        }
-                      />
-                    </Box>
-                    <Box component="span" display="block">
-                      Priority: <Chip 
-                        label={ticket.priority} 
-                        size="small"
-                        color={
-                          ticket.priority === 'HIGH' ? 'error' :
-                          ticket.priority === 'MEDIUM' ? 'warning' : 'success'
-                        }
-                      />
-                    </Box>
-                    <Box component="span" display="block">
-                      Customer ID: {ticket.customerId} | 
-                      Agent ID: {ticket.agentId || 'Unassigned'}
-                    </Box>
-                  </>
-                }
-              />
-            </ListItem>
-          ))
-        )}
-      </List>
+      {tickets.length === 0 ? (
+        <Typography sx={{ p: 2 }}>No tickets found</Typography>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Title</TableCell>
+                <TableCell>Assigned To</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Priority</TableCell>
+                <TableCell>Updated At</TableCell>
+                <TableCell align="right">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {tickets.map(ticket => (
+                <TableRow key={ticket.id}>
+                  <TableCell>{ticket.id}</TableCell>
+                  <TableCell>{ticket.title}</TableCell>
+                  <TableCell>{ticket.agentId || 'Unassigned'}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={ticket.status}
+                      color={
+                        ticket.status === 'OPEN' ? 'primary' :
+                        ticket.status === 'IN_PROGRESS' ? 'warning' :
+                        'success'
+                      }
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={ticket.priority}
+                      color={
+                        ticket.priority === 'HIGH' ? 'error' :
+                        ticket.priority === 'MEDIUM' ? 'warning' :
+                        'success'
+                      }
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{new Date(ticket.updatedAt).toLocaleString()}</TableCell>
+                  <TableCell align="right">
+                    <IconButton
+                      onClick={() => {
+                        setCurrentTicket(ticket);
+                        setFormOpen(true);
+                      }}
+                      size="small"
+                      sx={{ mr: 1 }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDelete(ticket.id)}
+                      size="small"
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <TicketForm
         open={formOpen}
