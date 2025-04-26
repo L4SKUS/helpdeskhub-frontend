@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTickets, getTicket, deleteTicket } from '../services/ticketService';
+import { getTickets, getTicket, deleteTicket, updateTicket } from '../services/ticketService';
 import {
   Table,
   TableBody,
@@ -11,12 +11,10 @@ import {
   Paper,
   Typography,
   Chip,
-  IconButton,
   CircularProgress,
   Box,
   TableSortLabel
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
 import TicketForm from './TicketForm';
 import TicketDetail from './TicketDetail';
 
@@ -26,9 +24,7 @@ const TicketList = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
   
-  // Sorting state
   const [orderBy, setOrderBy] = useState('updatedAt');
   const [order, setOrder] = useState('desc');
 
@@ -48,38 +44,42 @@ const TicketList = () => {
 
   const handleTitleClick = async (id) => {
     try {
-      setDetailLoading(true);
       const ticket = await getTicket(id);
       setSelectedTicket(ticket);
     } catch (error) {
       console.error('Error loading ticket details:', error);
-    } finally {
-      setDetailLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteTicket = async (id) => {
     try {
       await deleteTicket(id);
-      setTickets(tickets.filter(ticket => ticket.id !== id));
-      if (selectedTicket && selectedTicket.id === id) {
-        setSelectedTicket(null);
-      }
+      setTickets(prev => prev.filter(ticket => ticket.id !== id));
+      return true;
     } catch (error) {
       console.error('Error deleting ticket:', error);
+      return false;
+    }
+  };
+
+  const handleUpdateTicket = async (updatedTicket) => {
+    try {
+      const result = await updateTicket(updatedTicket.id, {
+        status: updatedTicket.status,
+        priority: updatedTicket.priority,
+        agentId: updatedTicket.agentId ? parseInt(updatedTicket.agentId) : null
+      });
+      setTickets(prev => prev.map(t => t.id === result.id ? result : t));
+      return result;
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+      throw error;
     }
   };
 
   const handleFormSuccess = (ticket) => {
-    setTickets(prevTickets => 
-      currentTicket
-        ? prevTickets.map(t => t.id === ticket.id ? ticket : t)
-        : [ticket, ...prevTickets]
-    );
+    setTickets(prev => [ticket, ...prev]);
     setFormOpen(false);
-    if (selectedTicket && selectedTicket.id === ticket.id) {
-      setSelectedTicket(ticket);
-    }
   };
 
   const handleSort = (property) => {
@@ -90,15 +90,13 @@ const TicketList = () => {
 
   const sortedTickets = React.useMemo(() => {
     return [...tickets].sort((a, b) => {
-      // Custom sorting for status
       if (orderBy === 'status') {
-        const statusOrder = { 'OPEN': 1, 'IN_PROGRESS': 2, 'RESOLVED': 3 };
+        const statusOrder = { 'OPEN': 1, 'IN_PROGRESS': 2, 'CLOSED': 3 };
         const aValue = statusOrder[a.status];
         const bValue = statusOrder[b.status];
         return order === 'asc' ? aValue - bValue : bValue - aValue;
       }
       
-      // Custom sorting for priority
       if (orderBy === 'priority') {
         const priorityOrder = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3 };
         const aValue = priorityOrder[a.priority];
@@ -106,7 +104,6 @@ const TicketList = () => {
         return order === 'asc' ? aValue - bValue : bValue - aValue;
       }
       
-      // Default sorting for other fields
       if (a[orderBy] < b[orderBy]) {
         return order === 'asc' ? -1 : 1;
       }
@@ -130,6 +127,8 @@ const TicketList = () => {
       <TicketDetail 
         ticket={selectedTicket} 
         onBack={() => setSelectedTicket(null)}
+        onUpdate={handleUpdateTicket}
+        onDelete={handleDeleteTicket}
       />
     );
   }
@@ -204,21 +203,18 @@ const TicketList = () => {
                     Updated At
                   </TableSortLabel>
                 </TableCell>
-                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedTickets.map(ticket => (
-                <TableRow key={ticket.id}>
+                <TableRow 
+                  key={ticket.id} 
+                  hover 
+                  onClick={() => handleTitleClick(ticket.id)}
+                  sx={{ cursor: 'pointer' }}
+                >
                   <TableCell>{ticket.id}</TableCell>
-                  <TableCell>
-                    <Button 
-                      onClick={() => handleTitleClick(ticket.id)}
-                      sx={{ textTransform: 'none', p: 0 }}
-                    >
-                      {ticket.title}
-                    </Button>
-                  </TableCell>
+                  <TableCell>{ticket.title}</TableCell>
                   <TableCell>{ticket.agentId || 'Unassigned'}</TableCell>
                   <TableCell>
                     <Chip 
@@ -250,24 +246,6 @@ const TicketList = () => {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      onClick={() => {
-                        setCurrentTicket(ticket);
-                        setFormOpen(true);
-                      }}
-                      size="small"
-                      sx={{ mr: 1 }}
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleDelete(ticket.id)}
-                      size="small"
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}

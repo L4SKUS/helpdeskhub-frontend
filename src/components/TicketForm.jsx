@@ -18,10 +18,8 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: 'OPEN',
     priority: 'MEDIUM',
-    customerId: '',
-    agentId: ''
+    customerId: ''
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -31,19 +29,15 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
       setFormData({
         title: ticket.title,
         description: ticket.description,
-        status: ticket.status,
         priority: ticket.priority,
-        customerId: ticket.customerId?.toString() || '',
-        agentId: ticket.agentId?.toString() || ''
+        customerId: ticket.customerId?.toString() || ''
       });
     } else {
       setFormData({
         title: '',
         description: '',
-        status: 'OPEN',
         priority: 'MEDIUM',
-        customerId: '',
-        agentId: ''
+        customerId: ''
       });
     }
     setErrors({});
@@ -55,7 +49,6 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
     if (!formData.description) newErrors.description = 'Description is required';
     if (!ticket && !formData.customerId) newErrors.customerId = 'Customer ID is required';
     if (!ticket && isNaN(formData.customerId)) newErrors.customerId = 'Must be a number';
-    if (formData.agentId && isNaN(formData.agentId)) newErrors.agentId = 'Must be a number';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -65,17 +58,12 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
 
     setSubmitting(true);
     try {
-      const payload = ticket ? {
-        status: formData.status,
-        priority: formData.priority,
-        agentId: formData.agentId ? parseInt(formData.agentId) : null
-      } : {
+      const payload = {
         title: formData.title,
         description: formData.description,
-        status: formData.status,
         priority: formData.priority,
-        customerId: parseInt(formData.customerId),
-        agentId: formData.agentId ? parseInt(formData.agentId) : null
+        status: 'OPEN', // Always set to OPEN
+        customerId: parseInt(formData.customerId)
       };
 
       const result = ticket ? 
@@ -99,46 +87,44 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{ticket ? 'Update Ticket' : 'Create New Ticket'}</DialogTitle>
       <DialogContent>
+        <TextField
+          margin="normal"
+          label="Title"
+          name="title"
+          fullWidth
+          value={formData.title}
+          onChange={handleChange}
+          error={!!errors.title}
+          helperText={errors.title}
+          disabled={submitting}
+        />
+        <TextField
+          margin="normal"
+          label="Description"
+          name="description"
+          fullWidth
+          multiline
+          rows={4}
+          value={formData.description}
+          onChange={handleChange}
+          error={!!errors.description}
+          helperText={errors.description}
+          disabled={submitting}
+        />
         {!ticket && (
-          <>
-            <TextField
-              margin="normal"
-              label="Title"
-              name="title"
-              fullWidth
-              value={formData.title}
-              onChange={handleChange}
-              error={!!errors.title}
-              helperText={errors.title}
-              disabled={submitting}
-            />
-            <TextField
-              margin="normal"
-              label="Description"
-              name="description"
-              fullWidth
-              multiline
-              rows={4}
-              value={formData.description}
-              onChange={handleChange}
-              error={!!errors.description}
-              helperText={errors.description}
-              disabled={submitting}
-            />
-            <TextField
-              margin="normal"
-              label="Customer ID"
-              name="customerId"
-              fullWidth
-              type="number"
-              value={formData.customerId}
-              onChange={handleChange}
-              error={!!errors.customerId}
-              helperText={errors.customerId}
-              disabled={submitting}
-              inputProps={{ min: 1 }}
-            />
-          </>
+          <TextField
+            margin="normal"
+            label="Customer ID"
+            name="customerId"
+            fullWidth
+            type="number"
+            value={formData.customerId}
+            onChange={handleChange}
+            error={!!errors.customerId}
+            helperText={errors.customerId}
+            disabled={submitting}
+            inputProps={{ min: 1 }}
+          />
         )}
 
         <FormControl fullWidth margin="normal">
@@ -155,35 +141,6 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
             <MenuItem value="HIGH">High</MenuItem>
           </Select>
         </FormControl>
-
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Status</InputLabel>
-          <Select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            label="Status"
-            disabled={submitting}
-          >
-            <MenuItem value="OPEN">Open</MenuItem>
-            <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-            <MenuItem value="RESOLVED">Resolved</MenuItem>
-          </Select>
-        </FormControl>
-
-        <TextField
-          margin="normal"
-          label="Agent ID (optional)"
-          name="agentId"
-          fullWidth
-          type="number"
-          value={formData.agentId}
-          onChange={handleChange}
-          error={!!errors.agentId}
-          helperText={errors.agentId}
-          disabled={submitting}
-          inputProps={{ min: 1 }}
-        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={submitting}>Cancel</Button>
