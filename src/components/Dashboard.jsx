@@ -1,39 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import TicketList from './TicketList';
+import Login from './Login';
+import { login, logout, isAuthenticated, getCurrentUser } from '../services/authService';
 
 const Dashboard = () => {
+  const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const authStatus = isAuthenticated();
+      setIsAuthenticatedState(authStatus);
+      if (authStatus) {
+        setUser(getCurrentUser());
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = async (credentials) => {
+    try {
+      await login(credentials);
+      setIsAuthenticatedState(true);
+      setUser(getCurrentUser());
+    } catch (error) {
+      alert('Login failed. Please check your credentials.');
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsAuthenticatedState(false);
+    setUser(null);
+  };
+
+  if (!isAuthenticatedState) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      minHeight: '100vh',  // Use minHeight instead of height to allow content to expand
+      minHeight: '100vh',
       bgcolor: '#121212',
-      width: '100vw',      // Ensure full viewport width
-      margin: 0,           // Remove default margins
-      padding: 0           // Remove default padding
+      width: '100vw',
+      margin: 0,
+      padding: 0
     }}>
-      {/* NavBar */}
-      <AppBar position="static" sx={{ flexShrink: 0 }}>  {/* Prevent navbar from shrinking */}
+      <AppBar position="static" sx={{ flexShrink: 0 }}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             HelpDeskHub
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Typography variant="subtitle1" sx={{ mr: 2, color: 'white' }}>
+            {user?.email}
+          </Typography>
+          <Button color="inherit" onClick={handleLogout}>Logout</Button>
         </Toolbar>
       </AppBar>
 
-      {/* Main Content */}
       <Box
         sx={{
-          flex: 1,  // Take up remaining space
+          flex: 1,
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'flex-start',  // Align to top instead of center
+          alignItems: 'flex-start',
           p: 2,
           overflow: 'auto',
           width: '100%',
-          boxSizing: 'border-box'  // Include padding in width calculation
+          boxSizing: 'border-box'
         }}
       >
         <Box sx={{ 

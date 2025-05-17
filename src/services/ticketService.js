@@ -2,9 +2,21 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8082/api/tickets';
 
+const api = axios.create();
+
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
+
 // CREATE - POST /api/tickets
 export const createTicket = (ticketData) => {
-  return axios.post(API_URL, ticketData)
+  return api.post(API_URL, ticketData)
     .then(response => response.data)
     .catch(error => {
       console.error('Create error:', error);
@@ -14,17 +26,21 @@ export const createTicket = (ticketData) => {
 
 // READ ALL - GET /api/tickets
 export const getTickets = () => {
-  return axios.get(API_URL)
+  return api.get(API_URL)
     .then(response => response.data)
     .catch(error => {
       console.error('Fetch error:', error);
+      if (error.response?.status === 401) {
+        // Handle unauthorized access
+        throw new Error('Session expired. Please login again.');
+      }
       throw error;
     });
 };
 
 // READ ONE - GET /api/tickets/{id}
 export const getTicket = (id) => {
-  return axios.get(`${API_URL}/${id}`)
+  return api.get(`${API_URL}/${id}`)
     .then(response => response.data)
     .catch(error => {
       console.error('Fetch error:', error);
@@ -34,7 +50,7 @@ export const getTicket = (id) => {
 
 // UPDATE - PUT /api/tickets/{id}
 export const updateTicket = (id, ticketData) => {
-  return axios.put(`${API_URL}/${id}`, ticketData)
+  return api.put(`${API_URL}/${id}`, ticketData)
     .then(response => response.data)
     .catch(error => {
       console.error('Update error:', error);
@@ -44,7 +60,7 @@ export const updateTicket = (id, ticketData) => {
 
 // DELETE - DELETE /api/tickets/{id}
 export const deleteTicket = (id) => {
-  return axios.delete(`${API_URL}/${id}`)
+  return api.delete(`${API_URL}/${id}`)
     .then(response => response.data)
     .catch(error => {
       console.error('Delete error:', error);

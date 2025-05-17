@@ -13,10 +13,12 @@ import {
   Chip,
   CircularProgress,
   Box,
-  TableSortLabel
+  TableSortLabel,
+  Alert
 } from '@mui/material';
 import TicketForm from './TicketForm';
 import TicketDetail from './TicketDetail';
+import { logout } from '../services/authService';
 
 const TicketList = () => {
   const [tickets, setTickets] = useState([]);
@@ -24,6 +26,7 @@ const TicketList = () => {
   const [formOpen, setFormOpen] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [error, setError] = useState(null);
   
   const [orderBy, setOrderBy] = useState('updatedAt');
   const [order, setOrder] = useState('desc');
@@ -33,8 +36,17 @@ const TicketList = () => {
       try {
         const data = await getTickets();
         setTickets(data);
+        setError(null);
       } catch (error) {
         console.error('Error loading tickets:', error);
+        setError(error.message);
+        if (error.message.includes('Session expired')) {
+          // Auto-logout if session expired
+          setTimeout(() => {
+            logout();
+            window.location.reload();
+          }, 3000);
+        }
       } finally {
         setLoading(false);
       }
@@ -46,8 +58,10 @@ const TicketList = () => {
     try {
       const ticket = await getTicket(id);
       setSelectedTicket(ticket);
+      setError(null);
     } catch (error) {
       console.error('Error loading ticket details:', error);
+      setError(error.message);
     }
   };
 
@@ -55,9 +69,11 @@ const TicketList = () => {
     try {
       await deleteTicket(id);
       setTickets(prev => prev.filter(ticket => ticket.id !== id));
+      setError(null);
       return true;
     } catch (error) {
       console.error('Error deleting ticket:', error);
+      setError(error.message);
       return false;
     }
   };
@@ -70,9 +86,11 @@ const TicketList = () => {
         agentId: updatedTicket.agentId ? parseInt(updatedTicket.agentId) : null
       });
       setTickets(prev => prev.map(t => t.id === result.id ? result : t));
+      setError(null);
       return result;
     } catch (error) {
       console.error('Error updating ticket:', error);
+      setError(error.message);
       throw error;
     }
   };
@@ -80,6 +98,7 @@ const TicketList = () => {
   const handleFormSuccess = (ticket) => {
     setTickets(prev => [ticket, ...prev]);
     setFormOpen(false);
+    setError(null);
   };
 
   const handleSort = (property) => {
@@ -147,6 +166,13 @@ const TicketList = () => {
           Create Ticket
         </Button>
       </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+          {error.includes('Session expired') && ' Redirecting to login...'}
+        </Alert>
+      )}
 
       {tickets.length === 0 ? (
         <Typography sx={{ p: 2 }}>No tickets found</Typography>
