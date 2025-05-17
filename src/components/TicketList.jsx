@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getTickets, getTicket, deleteTicket, updateTicket } from '../services/ticketService';
+import { getTickets, getTicket, deleteTicket, updateTicket, getTicketsByCustomer } from '../services/ticketService';
+import { getCurrentUser, logout } from '../services/authService';
 import {
   Table,
   TableBody,
@@ -18,7 +19,6 @@ import {
 } from '@mui/material';
 import TicketForm from './TicketForm';
 import TicketDetail from './TicketDetail';
-import { logout } from '../services/authService';
 
 const TicketList = () => {
   const [tickets, setTickets] = useState([]);
@@ -27,21 +27,27 @@ const TicketList = () => {
   const [currentTicket, setCurrentTicket] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [error, setError] = useState(null);
-  
   const [orderBy, setOrderBy] = useState('updatedAt');
   const [order, setOrder] = useState('desc');
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const data = await getTickets();
+        const currentUser = getCurrentUser();
+        let data;
+        
+        if (currentUser.role === 'CUSTOMER') {
+          data = await getTicketsByCustomer(currentUser.id);
+        } else {
+          data = await getTickets();
+        }
+        
         setTickets(data);
         setError(null);
       } catch (error) {
         console.error('Error loading tickets:', error);
         setError(error.message);
         if (error.message.includes('Session expired')) {
-          // Auto-logout if session expired
           setTimeout(() => {
             logout();
             window.location.reload();
@@ -155,7 +161,14 @@ const TicketList = () => {
   return (
     <Paper elevation={3} sx={{ p: 3, m: 2 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5">Tickets</Typography>
+        <Typography variant="h5">
+          Tickets
+          {getCurrentUser().role === 'CUSTOMER' && (
+            <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+              (Your tickets)
+            </Typography>
+          )}
+        </Typography>
         <Button
           variant="contained"
           onClick={() => {

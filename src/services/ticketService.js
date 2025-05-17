@@ -68,6 +68,25 @@ export const deleteTicket = (id) => {
     });
 };
 
+export const getTicketsByCustomer = async (customerId) => {
+  try {
+    const response = await fetch(`${API_URL}/customer/${customerId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch tickets');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching tickets:', error);
+    throw error;
+  }
+};
+
 export default {
   createTicket,
   getTickets,

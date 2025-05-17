@@ -11,12 +11,15 @@ export const login = async (credentials) => {
     });
 
     if (!response.ok) {
-      throw new Error('Login failed - Invalid credentials');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
     }
 
     const data = await response.json();
     localStorage.setItem('authToken', data.token);
     localStorage.setItem('userEmail', credentials.email);
+    localStorage.setItem('userRole', data.role);
+    localStorage.setItem('userId', data.id);
     return data;
   } catch (error) {
     console.error('Error during login:', error);
@@ -27,14 +30,22 @@ export const login = async (credentials) => {
 export const logout = () => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('userEmail');
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('userId');
 };
 
 export const isAuthenticated = () => {
-  return !!localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken');
+  if (!token) return false;
+
+  // Optional: Add JWT expiration check here if needed
+  return true;
 };
 
 export const getCurrentUser = () => {
   return {
-    email: localStorage.getItem('userEmail')
+    email: localStorage.getItem('userEmail'),
+    role: localStorage.getItem('userRole'),
+    id: localStorage.getItem('userId')
   };
 };

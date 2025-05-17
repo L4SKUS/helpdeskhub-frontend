@@ -1,10 +1,25 @@
-import axios from 'axios';
+const API_URL = 'http://localhost:8081/api/users';
 
-const userApi = axios.create({
-  baseURL: 'http://localhost:8081/api/users',
-});
+export const getUserById = async (userId) => {
+  try {
+    const response = await fetch(`${API_URL}/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
 
-export const getUsers = () => userApi.get('');
-export const getAgents = () => userApi.get('/?role=AGENT');
-export const getCustomers = () => userApi.get('/?role=CUSTOMER');
-export const getAdmins = () => userApi.get('/?role=ADMIN');
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+};
+
+export const getCurrentUserDetails = async () => {
+  const { id } = getCurrentUser();
+  return await getUserById(id);
+};
