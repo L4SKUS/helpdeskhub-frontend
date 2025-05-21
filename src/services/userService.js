@@ -1,4 +1,8 @@
+import axios from 'axios';
+
 const API_URL = 'http://localhost:8081/api/users';
+
+const api = axios.create();
 
 export const getUserById = async (userId) => {
   try {
@@ -22,4 +26,22 @@ export const getUserById = async (userId) => {
 export const getCurrentUserDetails = async () => {
   const { id } = getCurrentUser();
   return await getUserById(id);
+};
+
+export const getAgents = async() => {
+  return api.get(`${API_URL}/agents`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Fetch error:', error);
+      throw error;
+    });
+};
+
+export const getCustomer = (id) => {
+  return api.get(`${API_URL}/${id}`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Fetch error:', error);
+      throw error;
+    });
 };

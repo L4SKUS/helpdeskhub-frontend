@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { getTickets, getTicket, deleteTicket, updateTicket, getTicketsByCustomer } from '../services/ticketService';
+import {
+  getTickets,
+  getTicket,
+  deleteTicket,
+  updateTicket,
+  getTicketsByCustomer
+} from '../services/ticketService';
+import { getAgents } from '../services/userService';
 import { getCurrentUser, logout } from '../services/authService';
 import {
   Table,
@@ -22,6 +29,7 @@ import TicketDetail from './TicketDetail';
 
 const TicketList = () => {
   const [tickets, setTickets] = useState([]);
+  const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
@@ -31,21 +39,24 @@ const TicketList = () => {
   const [order, setOrder] = useState('desc');
 
   useEffect(() => {
-    const fetchTickets = async () => {
+    const fetchData = async () => {
       try {
         const currentUser = getCurrentUser();
-        let data;
-        
+        let ticketsData;
+
         if (currentUser.role === 'CUSTOMER') {
-          data = await getTicketsByCustomer(currentUser.id);
+          ticketsData = await getTicketsByCustomer(currentUser.id);
         } else {
-          data = await getTickets();
+          ticketsData = await getTickets();
         }
-        
-        setTickets(data);
+
+        const agentsData = await getAgents();
+
+        setTickets(ticketsData);
+        setAgents(agentsData);
         setError(null);
       } catch (error) {
-        console.error('Error loading tickets:', error);
+        console.error('Error loading data:', error);
         setError(error.message);
         if (error.message.includes('Session expired')) {
           setTimeout(() => {
@@ -57,7 +68,8 @@ const TicketList = () => {
         setLoading(false);
       }
     };
-    fetchTickets();
+
+    fetchData();
   }, []);
 
   const handleTitleClick = async (id) => {
@@ -117,27 +129,28 @@ const TicketList = () => {
     return [...tickets].sort((a, b) => {
       if (orderBy === 'status') {
         const statusOrder = { 'OPEN': 1, 'IN_PROGRESS': 2, 'CLOSED': 3 };
-        const aValue = statusOrder[a.status];
-        const bValue = statusOrder[b.status];
-        return order === 'asc' ? aValue - bValue : bValue - aValue;
+        return order === 'asc'
+          ? statusOrder[a.status] - statusOrder[b.status]
+          : statusOrder[b.status] - statusOrder[a.status];
       }
-      
+
       if (orderBy === 'priority') {
         const priorityOrder = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3 };
-        const aValue = priorityOrder[a.priority];
-        const bValue = priorityOrder[b.priority];
-        return order === 'asc' ? aValue - bValue : bValue - aValue;
+        return order === 'asc'
+          ? priorityOrder[a.priority] - priorityOrder[b.priority]
+          : priorityOrder[b.priority] - priorityOrder[a.priority];
       }
-      
-      if (a[orderBy] < b[orderBy]) {
-        return order === 'asc' ? -1 : 1;
-      }
-      if (a[orderBy] > b[orderBy]) {
-        return order === 'asc' ? 1 : -1;
-      }
+
+      if (a[orderBy] < b[orderBy]) return order === 'asc' ? -1 : 1;
+      if (a[orderBy] > b[orderBy]) return order === 'asc' ? 1 : -1;
       return 0;
     });
   }, [tickets, orderBy, order]);
+
+  const getAgentName = (agentId) => {
+    const agent = agents.find(a => a.id === agentId);
+    return agent ? `${agent.firstName} ${agent.lastName}` : 'Unassigned';
+  };
 
   if (loading) {
     return (
@@ -149,8 +162,8 @@ const TicketList = () => {
 
   if (selectedTicket) {
     return (
-      <TicketDetail 
-        ticket={selectedTicket} 
+      <TicketDetail
+        ticket={selectedTicket}
         onBack={() => setSelectedTicket(null)}
         onUpdate={handleUpdateTicket}
         onDelete={handleDeleteTicket}
@@ -203,9 +216,7 @@ const TicketList = () => {
                     ID
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
-                  Title
-                </TableCell>
+                <TableCell>Title</TableCell>
                 <TableCell sortDirection={orderBy === 'agentId' ? order : false}>
                   <TableSortLabel
                     active={orderBy === 'agentId'}
@@ -246,17 +257,17 @@ const TicketList = () => {
             </TableHead>
             <TableBody>
               {sortedTickets.map(ticket => (
-                <TableRow 
-                  key={ticket.id} 
-                  hover 
+                <TableRow
+                  key={ticket.id}
+                  hover
                   onClick={() => handleTitleClick(ticket.id)}
                   sx={{ cursor: 'pointer' }}
                 >
                   <TableCell>{ticket.id}</TableCell>
                   <TableCell>{ticket.title}</TableCell>
-                  <TableCell>{ticket.agentId || 'Unassigned'}</TableCell>
+                  <TableCell>{getAgentName(ticket.agentId)}</TableCell>
                   <TableCell>
-                    <Chip 
+                    <Chip
                       label={ticket.status}
                       color={
                         ticket.status === 'OPEN' ? 'primary' :
@@ -267,7 +278,7 @@ const TicketList = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Chip 
+                    <Chip
                       label={ticket.priority}
                       color={
                         ticket.priority === 'HIGH' ? 'error' :

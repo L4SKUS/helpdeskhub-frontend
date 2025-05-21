@@ -9,35 +9,33 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  FormHelperText
+  MenuItem
 } from '@mui/material';
 import { createTicket, updateTicket } from '../services/ticketService';
+import { getCurrentUser } from '../services/authService';
 
 const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priority: 'MEDIUM',
-    customerId: ''
+    priority: 'MEDIUM'
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
     if (ticket) {
       setFormData({
         title: ticket.title,
         description: ticket.description,
-        priority: ticket.priority,
-        customerId: ticket.customerId?.toString() || ''
+        priority: ticket.priority
       });
     } else {
       setFormData({
         title: '',
         description: '',
-        priority: 'MEDIUM',
-        customerId: ''
+        priority: 'MEDIUM'
       });
     }
     setErrors({});
@@ -47,8 +45,6 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
     const newErrors = {};
     if (!formData.title) newErrors.title = 'Title is required';
     if (!formData.description) newErrors.description = 'Description is required';
-    if (!ticket && !formData.customerId) newErrors.customerId = 'Customer ID is required';
-    if (!ticket && isNaN(formData.customerId)) newErrors.customerId = 'Must be a number';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -62,9 +58,13 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
         title: formData.title,
         description: formData.description,
         priority: formData.priority,
-        status: 'OPEN', // Always set to OPEN
-        customerId: parseInt(formData.customerId)
+        status: 'OPEN' // Always set to OPEN for new tickets
       };
+
+      // For new tickets, add the current user's ID as customerId
+      if (!ticket) {
+        payload.customerId = currentUser.id;
+      }
 
       const result = ticket ? 
         await updateTicket(ticket.id, payload) :
@@ -111,21 +111,6 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
           helperText={errors.description}
           disabled={submitting}
         />
-        {!ticket && (
-          <TextField
-            margin="normal"
-            label="Customer ID"
-            name="customerId"
-            fullWidth
-            type="number"
-            value={formData.customerId}
-            onChange={handleChange}
-            error={!!errors.customerId}
-            helperText={errors.customerId}
-            disabled={submitting}
-            inputProps={{ min: 1 }}
-          />
-        )}
 
         <FormControl fullWidth margin="normal">
           <InputLabel>Priority</InputLabel>
