@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Paper } from '@mui/material';
 import TicketList from './TicketList';
+import UserManagement from './UserManagement'; // make sure this component exists
 import Login from './Login';
 import { login, logout, isAuthenticated, getCurrentUser } from '../services/authService';
 
 const Dashboard = () => {
   const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
   const [user, setUser] = useState(null);
+  const [view, setView] = useState('tickets'); // NEW
 
   useEffect(() => {
     const checkAuth = () => {
@@ -40,9 +42,9 @@ const Dashboard = () => {
   }
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
       minHeight: '100vh',
       bgcolor: '#121212',
       width: '100vw',
@@ -57,6 +59,11 @@ const Dashboard = () => {
           <Typography variant="subtitle1" sx={{ mr: 2, color: 'white' }}>
             {user?.email}
           </Typography>
+          {user?.role === 'ADMIN' && (
+            <Button color="inherit" onClick={() => setView(view === 'users' ? 'tickets' : 'users')}>
+              {view === 'users' ? 'View Tickets' : 'Manage Users'}
+            </Button>
+          )}
           <Button color="inherit" onClick={handleLogout}>Logout</Button>
         </Toolbar>
       </AppBar>
@@ -73,12 +80,13 @@ const Dashboard = () => {
           boxSizing: 'border-box'
         }}
       >
-        <Box sx={{ 
-          width: '100%', 
+        <Box sx={{
+          width: '100%',
           maxWidth: 1000,
           marginTop: 0
         }}>
-          <TicketList />
+          {view === 'tickets' && <TicketList />}
+          {view === 'users' && user?.role === 'ADMIN' && <UserManagement />}
         </Box>
       </Box>
     </Box>

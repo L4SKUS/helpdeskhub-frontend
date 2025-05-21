@@ -45,3 +45,38 @@ export const getCustomer = (id) => {
       throw error;
     });
 };
+
+export const getAllUsers = async () => {
+  return api.get(`${API_URL}`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Fetch error:', error);
+      throw error;
+    });
+};
+
+export const createUser = async (userData) => {
+  return api.post(`${API_URL}`, userData)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Create error:', error);
+      throw error;
+    });
+};
+
+export const updateUser = async (id, userData) => {
+  return api.put(`${API_URL}/${id}`, userData)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Update error:', error);
+      throw error;
+    });
+};
+
+export const deleteUser = async (id) => {
+  return api.delete(`${API_URL}/${id}`)
+    .catch(error => {
+      console.error('Delete error:', error);
+      throw error;
+    });
+};
