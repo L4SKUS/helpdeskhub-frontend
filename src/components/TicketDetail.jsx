@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Button, 
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
   Chip,
   Divider,
   TextField,
@@ -13,9 +13,11 @@ import {
   MenuItem,
   CircularProgress
 } from '@mui/material';
+
 import { updateTicket } from '../services/ticketService';
 import { getCurrentUser } from '../services/authService';
 import { getAgents, getCustomer } from '../services/userService';
+import CommentList from './CommentList'; // Import CommentList
 
 const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => {
   const [ticket, setTicket] = useState(initialTicket);
@@ -26,8 +28,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
   const [loadingAgents, setLoadingAgents] = useState(false);
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const currentUser = getCurrentUser();
-  
-  // Fetch agents and customer when component mounts and when ticket changes
+
   useEffect(() => {
     fetchAgents();
     fetchCustomer();
@@ -47,7 +48,6 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
 
   const fetchCustomer = async () => {
     if (!ticket.customerId) return;
-    
     setLoadingCustomer(true);
     try {
       const customerData = await getCustomer(ticket.customerId);
@@ -102,9 +102,9 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
   };
 
   const formatDate = (dateString) => {
-    const options = { 
-      year: 'numeric', 
-      month: 'long', 
+    const options = {
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -113,11 +113,11 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
   };
 
   const canEdit = () => {
-    return currentUser.role === 'CUSTOMER' || currentUser.role === 'AGENT' || currentUser.role === 'ADMIN';
+    return ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
   };
 
   const canDelete = () => {
-    return currentUser.role === 'CUSTOMER' || currentUser.role === 'AGENT' || currentUser.role === 'ADMIN';
+    return ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
   };
 
   const getAgentName = (agentId) => {
@@ -147,8 +147,8 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
                 </Button>
               )}
               {canDelete() && (
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   color="error"
                   onClick={handleDelete}
                   disabled={loading}
@@ -159,15 +159,15 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
             </>
           ) : (
             <>
-              <Button 
-                variant="outlined" 
+              <Button
+                variant="outlined"
                 onClick={() => setIsEditing(false)}
                 disabled={loading}
               >
                 Cancel
               </Button>
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={handleSave}
                 disabled={loading}
               >
@@ -177,7 +177,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
           )}
         </Box>
       </Box>
-      
+
       {isEditing ? (
         <>
           <TextField
@@ -188,7 +188,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
             value={ticket.title}
             onChange={handleChange}
           />
-          
+
           <TextField
             margin="normal"
             label="Description"
@@ -255,34 +255,34 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
       ) : (
         <>
           <Typography variant="h4" gutterBottom>{ticket.title}</Typography>
-          
+
           <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <Chip 
+            <Chip
               label={ticket.status}
               color={
                 ticket.status === 'OPEN' ? 'primary' :
-                ticket.status === 'IN_PROGRESS' ? 'warning' :
-                'success'
+                  ticket.status === 'IN_PROGRESS' ? 'warning' :
+                    'success'
               }
             />
-            <Chip 
+            <Chip
               label={ticket.priority}
               color={
                 ticket.priority === 'HIGH' ? 'error' :
-                ticket.priority === 'MEDIUM' ? 'warning' :
-                'success'
+                  ticket.priority === 'MEDIUM' ? 'warning' :
+                    'success'
               }
             />
           </Box>
-          
+
           <Divider sx={{ my: 2 }} />
-          
+
           <Typography variant="body1" paragraph>
             {ticket.description}
           </Typography>
-          
+
           <Divider sx={{ my: 2 }} />
-          
+
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography variant="caption">
               Created: {formatDate(ticket.createdAt)}
@@ -291,7 +291,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
               Last updated: {formatDate(ticket.updatedAt)}
             </Typography>
           </Box>
-          
+
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2">Customer: {getCustomerName()}</Typography>
             <Typography variant="subtitle2">
@@ -300,6 +300,9 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
           </Box>
         </>
       )}
+
+      <Divider sx={{ my: 3 }} />
+      <CommentList ticketId={ticket.id} />
     </Paper>
   );
 };

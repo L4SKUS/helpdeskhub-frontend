@@ -4,7 +4,8 @@ import {
   getTicket,
   deleteTicket,
   updateTicket,
-  getTicketsByCustomer
+  getTicketsByCustomer,
+  getTicketsByAgent
 } from '../services/ticketService';
 import { getAgents } from '../services/userService';
 import { getCurrentUser, logout } from '../services/authService';
@@ -22,7 +23,9 @@ import {
   CircularProgress,
   Box,
   TableSortLabel,
-  Alert
+  Alert,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import TicketForm from './TicketForm';
 import TicketDetail from './TicketDetail';
@@ -37,20 +40,27 @@ const TicketList = () => {
   const [error, setError] = useState(null);
   const [orderBy, setOrderBy] = useState('updatedAt');
   const [order, setOrder] = useState('desc');
+  const [viewMode, setViewMode] = useState('all'); // 'all' or 'assigned'
+
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const currentUser = getCurrentUser();
         let ticketsData;
+        const agentsData = await getAgents();
 
         if (currentUser.role === 'CUSTOMER') {
           ticketsData = await getTicketsByCustomer(currentUser.id);
+        } else if (currentUser.role === 'AGENT' || currentUser.role === 'ADMIN') {
+          if (viewMode === 'assigned') {
+            ticketsData = await getTicketsByAgent(currentUser.id);
+          } else {
+            ticketsData = await getTickets();
+          }
         } else {
           ticketsData = await getTickets();
         }
-
-        const agentsData = await getAgents();
 
         setTickets(ticketsData);
         setAgents(agentsData);
@@ -70,7 +80,13 @@ const TicketList = () => {
     };
 
     fetchData();
-  }, []);
+  }, [viewMode]);
+
+  const handleViewModeChange = (event, newViewMode) => {
+    if (newViewMode !== null) {
+      setViewMode(newViewMode);
+    }
+  };
 
   const handleTitleClick = async (id) => {
     try {
@@ -176,21 +192,36 @@ const TicketList = () => {
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">
           Tickets
-          {getCurrentUser().role === 'CUSTOMER' && (
+          {currentUser.role === 'CUSTOMER' && (
             <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
               (Your tickets)
             </Typography>
           )}
         </Typography>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setCurrentTicket(null);
-            setFormOpen(true);
-          }}
-        >
-          Create Ticket
-        </Button>
+        
+        <Box display="flex" alignItems="center" gap={2}>
+          {(currentUser.role === 'AGENT' || currentUser.role === 'ADMIN') && (
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewModeChange}
+              size="small"
+            >
+              <ToggleButton value="all">All Tickets</ToggleButton>
+              <ToggleButton value="assigned">My Tickets</ToggleButton>
+            </ToggleButtonGroup>
+          )}
+          
+          <Button
+            variant="contained"
+            onClick={() => {
+              setCurrentTicket(null);
+              setFormOpen(true);
+            }}
+          >
+            Create Ticket
+          </Button>
+        </Box>
       </Box>
 
       {error && (

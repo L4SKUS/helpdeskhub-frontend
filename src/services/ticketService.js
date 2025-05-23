@@ -87,6 +87,25 @@ export const getTicketsByCustomer = async (customerId) => {
   }
 };
 
+export const getTicketsByAgent = async (agentId) => {
+  try {
+    const response = await fetch(`${API_URL}/agent/${agentId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch tickets');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching tickets:', error);
+    throw error;
+  }
+};
+
 export default {
   createTicket,
   getTickets,
