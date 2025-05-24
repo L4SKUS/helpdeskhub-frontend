@@ -5,8 +5,17 @@ import {
   Button, 
   Typography, 
   Paper,
-  CssBaseline
+  CssBaseline,
+  Divider,
+  InputAdornment,
+  Stack
 } from '@mui/material';
+import {
+  Email as EmailIcon,
+  Lock as LockIcon,
+  AccountCircle as UserIcon,
+  Login as LoginIcon
+} from '@mui/icons-material';
 
 const Login = ({ onLogin }) => {
   const [credentials, setCredentials] = useState({
@@ -35,117 +44,162 @@ const Login = ({ onLogin }) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          minHeight: '100vh',
+          height: '100vh',
           width: '100vw',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          bgcolor: '#121212',
-          p: 2,
-          boxSizing: 'border-box'
+          background: 'linear-gradient(45deg, #2c3e50 0%, #4a6491 100%)',
+          overflow: 'hidden'
         }}
       >
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            p: 4,
+        <Box
+          sx={{
+            px: 2,
             width: '100%',
-            maxWidth: 400,
-            bgcolor: '#1e1e1e',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
+            maxWidth: 450
           }}
         >
-          <Typography 
-            variant="h5" 
-            gutterBottom 
+          <Paper 
+            elevation={6} 
             sx={{ 
-              color: 'white', 
-              mb: 3,
-              textAlign: 'center',
-              width: '100%'
+              p: 4,
+              borderRadius: 3,
+              bgcolor: 'background.paper',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
             }}
           >
-            Login to HelpDeskHub
-          </Typography>
-          
-          <Box 
-            component="form" 
-            onSubmit={handleSubmit}
-            sx={{
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}
-          >
-            <TextField
-              fullWidth
-              label="Email"
-              name="email"
-              type="email"
-              value={credentials.email}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              required
-              sx={{ mb: 2 }}
-              InputLabelProps={{ 
-                style: { 
-                  color: '#aaa',
-                  transformOrigin: 'center',
-                  '&.Mui-focused': {
-                    transformOrigin: 'center'
-                  }
-                } 
-              }}
-              InputProps={{ 
-                style: { color: 'white' },
-                notched: false
-              }}
-            />
-            
-            <TextField
-              fullWidth
-              label="Password"
-              name="password"
-              type="password"
-              value={credentials.password}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              required
-              sx={{ mb: 3 }}
-              InputLabelProps={{ 
-                style: { 
-                  color: '#aaa',
-                  transformOrigin: 'center'
-                } 
-              }}
-              InputProps={{ 
-                style: { color: 'white' },
-                notched: false
-              }}
-            />
-            
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              size="large"
-              fullWidth
+            <Box 
               sx={{ 
-                py: 1.5,
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                maxWidth: 400
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                mb: 3
               }}
             >
-              LOGIN
-            </Button>
-          </Box>
-        </Paper>
+              <UserIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
+              <Typography 
+                variant="h4" 
+                component="h1"
+                sx={{ 
+                  fontWeight: 600,
+                  background: 'linear-gradient(45deg, #2c3e50 30%, #4a6491 90%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textAlign: 'center'
+                }}
+              >
+                HelpDeskHub
+              </Typography>
+              <Typography 
+                variant="subtitle1"
+                color="text.secondary"
+                sx={{ mt: 1 }}
+              >
+                Sign in to your account
+              </Typography>
+            </Box>
+            
+            <Divider sx={{ width: '100%', mb: 3 }} />
+            
+            <Box 
+              component="form" 
+              onSubmit={handleSubmit}
+              sx={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2
+              }}
+            >
+              <TextField
+                fullWidth
+                label="Email Address"
+                name="email"
+                type="email"
+                value={credentials.email}
+                onChange={handleChange}
+                margin="normal"
+                variant="outlined"
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2
+                  }
+                }}
+              />
+              
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type="password"
+                value={credentials.password}
+                onChange={handleChange}
+                margin="normal"
+                variant="outlined"
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2
+                  }
+                }}
+              />
+              
+              <Stack direction="row" justifyContent="flex-end" sx={{ mb: 1 }}>
+                <Button 
+                  size="small" 
+                  color="primary"
+                  sx={{ textTransform: 'none' }}
+                >
+                  Forgot password?
+                </Button>
+              </Stack>
+              
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="large"
+                fullWidth
+                startIcon={<LoginIcon />}
+                sx={{ 
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  mt: 1,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    boxShadow: 'none',
+                    background: 'linear-gradient(45deg, #2c3e50 30%, #4a6491 90%)'
+                  }
+                }}
+              >
+                Sign In
+              </Button>
+            </Box>
+          </Paper>
+
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ mt: 3, textAlign: 'center' }}
+          >
+            © {new Date().getFullYear()} HelpDeskHub - All rights reserved
+          </Typography>
+        </Box>
       </Box>
     </>
   );

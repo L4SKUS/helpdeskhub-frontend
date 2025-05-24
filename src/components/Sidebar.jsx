@@ -7,10 +7,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Checkbox,
-  FormControlLabel,
   Button,
-  Paper
+  Paper,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
 
 const Sidebar = ({ filters, setFilters, agents }) => {
@@ -31,7 +31,14 @@ const Sidebar = ({ filters, setFilters, agents }) => {
   const handleAgentChange = (event) => {
     setFilters(prev => ({
       ...prev,
-      agentId: event.target.value
+      agentId: event.target.value === "unassigned" ? null : event.target.value
+    }));
+  };
+
+  const handleArchiveToggle = (event) => {
+    setFilters(prev => ({
+      ...prev,
+      archive: event.target.checked
     }));
   };
 
@@ -39,7 +46,8 @@ const Sidebar = ({ filters, setFilters, agents }) => {
     setFilters({
       status: '',
       priority: '',
-      agentId: ''
+      agentId: '',
+      archive: false
     });
   };
 
@@ -57,11 +65,11 @@ const Sidebar = ({ filters, setFilters, agents }) => {
             value={filters.status}
             label="Status"
             onChange={handleStatusChange}
+            disabled={filters.archive}
           >
             <MenuItem value="">All Statuses</MenuItem>
             <MenuItem value="OPEN">Open</MenuItem>
             <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-            <MenuItem value="CLOSED">Closed</MenuItem>
           </Select>
         </FormControl>
 
@@ -82,11 +90,12 @@ const Sidebar = ({ filters, setFilters, agents }) => {
         <FormControl fullWidth size="small">
           <InputLabel>Assigned To</InputLabel>
           <Select
-            value={filters.agentId}
+            value={filters.agentId === null ? "unassigned" : filters.agentId}
             label="Assigned To"
             onChange={handleAgentChange}
           >
             <MenuItem value="">All Agents</MenuItem>
+            <MenuItem value="unassigned">Unassigned</MenuItem>
             {agents.map(agent => (
               <MenuItem key={agent.id} value={agent.id}>
                 {agent.firstName} {agent.lastName}
@@ -94,6 +103,16 @@ const Sidebar = ({ filters, setFilters, agents }) => {
             ))}
           </Select>
         </FormControl>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.archive || false}
+              onChange={handleArchiveToggle}
+            />
+          }
+          label="Show Closed Tickets"
+        />
 
         <Button
           variant="outlined"

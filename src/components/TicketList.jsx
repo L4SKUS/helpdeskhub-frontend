@@ -23,9 +23,25 @@ import {
   Box,
   TableSortLabel,
   Alert,
-  IconButton
+  IconButton,
+  Stack,
+  Divider
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  Refresh,
+  Add,
+  Edit,
+  Delete,
+  ArrowBack,
+  AssignmentInd,
+  LowPriority,
+  PriorityHigh,
+  CheckCircle,
+  HourglassEmpty,
+  LockOpen,
+  Event,
+  Update
+} from '@mui/icons-material';
 import TicketForm from './TicketForm';
 import TicketDetail from './TicketDetail';
 import Sidebar from './Sidebar';
@@ -43,7 +59,8 @@ const TicketList = () => {
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
-    agentId: ''
+    agentId: '',
+    archive: false
   });
   const [needsRefresh, setNeedsRefresh] = useState(true);
 
@@ -142,21 +159,47 @@ const TicketList = () => {
     setOrderBy(property);
   };
 
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'OPEN': return <LockOpen fontSize="small" />;
+      case 'IN_PROGRESS': return <HourglassEmpty fontSize="small" />;
+      case 'CLOSED': return <CheckCircle fontSize="small" />;
+      default: return null;
+    }
+  };
+
+  const getPriorityIcon = (priority) => {
+    switch (priority) {
+      case 'HIGH': return <PriorityHigh fontSize="small" />;
+      case 'MEDIUM': return <LowPriority fontSize="small" />;
+      case 'LOW': return <LowPriority fontSize="small" />;
+      default: return null;
+    }
+  };
+
   const filteredAndSortedTickets = useMemo(() => {
     let filtered = [...tickets];
-    
+
+    if (filters.archive) {
+      filtered = filtered.filter(ticket => ticket.status === 'CLOSED');
+    } else {
+      filtered = filtered.filter(
+        ticket => ticket.status === 'OPEN' || ticket.status === 'IN_PROGRESS'
+      );
+    }
+
     if (filters.status) {
       filtered = filtered.filter(ticket => ticket.status === filters.status);
     }
-    
+
     if (filters.priority) {
       filtered = filtered.filter(ticket => ticket.priority === filters.priority);
     }
-    
+
     if (filters.agentId) {
       filtered = filtered.filter(ticket => ticket.agentId === parseInt(filters.agentId));
     }
-    
+
     return filtered.sort((a, b) => {
       if (orderBy === 'status') {
         const statusOrder = { 'OPEN': 1, 'IN_PROGRESS': 2, 'CLOSED': 3 };
@@ -185,7 +228,7 @@ const TicketList = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
         <CircularProgress />
       </Box>
     );
@@ -203,16 +246,16 @@ const TicketList = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
+    <Box sx={{ display: 'flex', gap: 3, p: 2 }}>
       <Sidebar 
         filters={filters} 
         setFilters={setFilters} 
         agents={agents} 
       />
       
-      <Paper elevation={3} sx={{ p: 3, flex: 1 }}>
+      <Paper elevation={3} sx={{ p: 3, flex: 1, borderRadius: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <Typography variant="h5">
+          <Typography variant="h5" sx={{ fontWeight: 300 }}>
             Tickets
             {currentUser.role === 'CUSTOMER' && (
               <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
@@ -221,20 +264,30 @@ const TicketList = () => {
             )}
           </Typography>
           
-          <Box>
-            <IconButton onClick={handleRefresh} sx={{ mr: 2 }} title="Refresh">
-              <RefreshIcon />
+          <Stack direction="row" spacing={1}>
+            <IconButton 
+              onClick={handleRefresh} 
+              title="Refresh"
+              sx={{ 
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1
+              }}
+            >
+              <Refresh fontSize="small" />
             </IconButton>
             <Button
               variant="contained"
+              startIcon={<Add />}
               onClick={() => {
                 setCurrentTicket(null);
                 setFormOpen(true);
               }}
+              sx={{ textTransform: 'none' }}
             >
               Create Ticket
             </Button>
-          </Box>
+          </Stack>
         </Box>
 
         {error && (
@@ -244,10 +297,14 @@ const TicketList = () => {
           </Alert>
         )}
 
+        <Divider sx={{ my: 2 }} />
+
         {filteredAndSortedTickets.length === 0 ? (
-          <Typography sx={{ p: 2 }}>No tickets found</Typography>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="100px">
+            <Typography color="text.secondary">No tickets found matching your criteria</Typography>
+          </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -294,7 +351,7 @@ const TicketList = () => {
                       direction={orderBy === 'updatedAt' ? order : 'desc'}
                       onClick={() => handleSort('updatedAt')}
                     >
-                      Updated At
+                      Last Updated
                     </TableSortLabel>
                   </TableCell>
                 </TableRow>
@@ -305,24 +362,35 @@ const TicketList = () => {
                     key={ticket.id}
                     hover
                     onClick={() => handleTitleClick(ticket.id)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:last-child td, &:last-child th': { border: 0 }
+                    }}
                   >
                     <TableCell>{ticket.id}</TableCell>
-                    <TableCell>{ticket.title}</TableCell>
-                    <TableCell>{getAgentName(ticket.agentId)}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{ticket.title}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <AssignmentInd fontSize="small" color="action" />
+                        <span>{getAgentName(ticket.agentId)}</span>
+                      </Stack>
+                    </TableCell>
                     <TableCell>
                       <Chip
-                        label={ticket.status}
+                        icon={getStatusIcon(ticket.status)}
+                        label={ticket.status.replace('_', ' ')}
                         color={
                           ticket.status === 'OPEN' ? 'primary' :
                           ticket.status === 'IN_PROGRESS' ? 'warning' :
                           'success'
                         }
                         size="small"
+                        variant="outlined"
                       />
                     </TableCell>
                     <TableCell>
                       <Chip
+                        icon={getPriorityIcon(ticket.priority)}
                         label={ticket.priority}
                         color={
                           ticket.priority === 'HIGH' ? 'error' :
@@ -330,16 +398,22 @@ const TicketList = () => {
                           'success'
                         }
                         size="small"
+                        variant="outlined"
                       />
                     </TableCell>
                     <TableCell>
-                      {new Date(ticket.updatedAt).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Update fontSize="small" color="action" />
+                        <span>
+                          {new Date(ticket.updatedAt).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))}

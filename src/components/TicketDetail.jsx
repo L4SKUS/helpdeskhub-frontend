@@ -11,13 +11,29 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress
+  CircularProgress,
+  Stack
 } from '@mui/material';
-
+import {
+  ArrowBack,
+  Edit,
+  Delete,
+  Cancel,
+  Save,
+  Person,
+  AssignmentInd,
+  LowPriority,
+  PriorityHigh,
+  Event,
+  Update,
+  CheckCircle,
+  HourglassEmpty,
+  LockOpen
+} from '@mui/icons-material';
 import { updateTicket } from '../services/ticketService';
 import { getCurrentUser } from '../services/authService';
 import { getAgents, getCustomer } from '../services/userService';
-import CommentList from './CommentList'; // Import CommentList
+import CommentList from './CommentList';
 
 const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => {
   const [ticket, setTicket] = useState(initialTicket);
@@ -104,7 +120,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
   const formatDate = (dateString) => {
     const options = {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -112,13 +128,8 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const canEdit = () => {
-    return ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
-  };
-
-  const canDelete = () => {
-    return ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
-  };
+  const canEdit = () => ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
+  const canDelete = () => ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
 
   const getAgentName = (agentId) => {
     if (!agentId) return 'Unassigned';
@@ -132,178 +143,243 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
     return customer ? `${customer.firstName} ${customer.lastName}` : `Customer ${ticket.customerId}`;
   };
 
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'OPEN': return <LockOpen fontSize="small" />;
+      case 'IN_PROGRESS': return <HourglassEmpty fontSize="small" />;
+      case 'CLOSED': return <CheckCircle fontSize="small" />;
+      default: return null;
+    }
+  };
+
+  const getPriorityIcon = (priority) => {
+    switch (priority) {
+      case 'HIGH': return <PriorityHigh fontSize="small" />;
+      case 'MEDIUM': return <LowPriority fontSize="small" />;
+      case 'LOW': return <LowPriority fontSize="small" />;
+      default: return null;
+    }
+  };
+
+  const getStatusDescription = (status) => {
+    switch (status) {
+      case 'OPEN': return 'Ticket is open and awaiting assignment';
+      case 'IN_PROGRESS': return 'Ticket is being worked on';
+      case 'CLOSED': return 'Ticket has been resolved';
+      default: return '';
+    }
+  };
+
+  const getPriorityDescription = (priority) => {
+    switch (priority) {
+      case 'HIGH': return 'Critical issue - needs immediate attention';
+      case 'MEDIUM': return 'Important issue - address soon';
+      case 'LOW': return 'Minor issue - can wait';
+      default: return '';
+    }
+  };
+
   return (
-    <Paper elevation={3} sx={{ p: 3, m: 2 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Button variant="outlined" onClick={onBack}>
-          Back to Tickets
-        </Button>
-        <Box display="flex" gap={1}>
-          {!isEditing ? (
-            <>
-              {canEdit() && (
-                <Button variant="contained" onClick={() => setIsEditing(true)}>
-                  Edit Ticket
-                </Button>
-              )}
-              {canDelete() && (
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleDelete}
+    <Box sx={{ display: 'flex', gap: 3, p: 2 }}>
+      <Paper elevation={3} sx={{ flex: 1, p: 3, borderRadius: 2 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Button 
+            variant="outlined" 
+            startIcon={<ArrowBack />} 
+            onClick={onBack}
+            sx={{ textTransform: 'none' }}
+          >
+            Back to tickets
+          </Button>
+          <Box display="flex" gap={1}>
+            {!isEditing ? (
+              <>
+                {canEdit() && (
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<Edit />} 
+                    onClick={() => setIsEditing(true)}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Edit
+                  </Button>
+                )}
+                {canDelete() && (
+                  <Button 
+                    variant="outlined" 
+                    color="error" 
+                    startIcon={<Delete />} 
+                    onClick={handleDelete} 
+                    disabled={loading}
+                    sx={{textTransform: 'none'}}
+                  >
+                    {loading ? <CircularProgress size={20} thickness={5} /> : 'Delete'}
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<Cancel />} 
+                  onClick={() => setIsEditing(false)} 
                   disabled={loading}
+                  sx={{ textTransform: 'none' }}
                 >
-                  {loading ? <CircularProgress size={24} /> : 'Delete Ticket'}
+                  Cancel
                 </Button>
-              )}
-            </>
-          ) : (
-            <>
-              <Button
-                variant="outlined"
-                onClick={() => setIsEditing(false)}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Save Changes'}
-              </Button>
-            </>
-          )}
+                <Button 
+                  variant="contained" 
+                  startIcon={<Save />} 
+                  onClick={handleSave} 
+                  disabled={loading}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {loading ? <CircularProgress size={24} /> : 'Save Changes'}
+                </Button>
+              </>
+            )}
+          </Box>
         </Box>
-      </Box>
 
-      {isEditing ? (
-        <>
-          <TextField
-            margin="normal"
-            label="Title"
-            name="title"
-            fullWidth
-            value={ticket.title}
-            onChange={handleChange}
-          />
-
-          <TextField
-            margin="normal"
-            label="Description"
-            name="description"
-            fullWidth
-            multiline
-            rows={4}
-            value={ticket.description}
-            onChange={handleChange}
-          />
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Priority</InputLabel>
-            <Select
-              name="priority"
-              value={ticket.priority}
+        {isEditing ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField 
+              fullWidth 
+              name="title" 
+              label="Title" 
+              value={ticket.title} 
+              onChange={handleChange} 
+              size="small"
+            />
+            <TextField
+              fullWidth
+              multiline
+              rows={6}
+              name="description"
+              label="Description"
+              value={ticket.description}
               onChange={handleChange}
-              label="Priority"
-            >
-              <MenuItem value="LOW">Low</MenuItem>
-              <MenuItem value="MEDIUM">Medium</MenuItem>
-              <MenuItem value="HIGH">High</MenuItem>
-            </Select>
-          </FormControl>
-
-          {(currentUser.role === 'AGENT' || currentUser.role === 'ADMIN') && (
-            <>
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  name="status"
-                  value={ticket.status}
-                  onChange={handleChange}
-                  label="Status"
-                >
-                  <MenuItem value="OPEN">Open</MenuItem>
-                  <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-                  <MenuItem value="CLOSED">Closed</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth margin="normal">
-                <InputLabel>Assign to Agent</InputLabel>
-                <Select
-                  name="agentId"
-                  value={ticket.agentId || ''}
-                  onChange={handleChange}
-                  label="Assign to Agent"
-                  disabled={loadingAgents}
-                >
-                  <MenuItem value="">
-                    <em>Unassigned</em>
-                  </MenuItem>
-                  {agents.map(agent => (
-                    <MenuItem key={agent.id} value={agent.id}>
-                      {agent.firstName} {agent.lastName} ({agent.email})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </>
-          )}
-        </>
-      ) : (
-        <>
-          <Typography variant="h4" gutterBottom>{ticket.title}</Typography>
-
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <Chip
-              label={ticket.status}
-              color={
-                ticket.status === 'OPEN' ? 'primary' :
-                  ticket.status === 'IN_PROGRESS' ? 'warning' :
-                    'success'
-              }
+              placeholder="You can use bullet points, new lines, etc."
+              size="small"
             />
-            <Chip
-              label={ticket.priority}
-              color={
-                ticket.priority === 'HIGH' ? 'error' :
-                  ticket.priority === 'MEDIUM' ? 'warning' :
-                    'success'
-              }
-            />
+            <FormControl fullWidth size="small">
+              <InputLabel>Priority</InputLabel>
+              <Select 
+                name="priority" 
+                value={ticket.priority} 
+                onChange={handleChange} 
+                label="Priority"
+              >
+                <MenuItem value="LOW">Low</MenuItem>
+                <MenuItem value="MEDIUM">Medium</MenuItem>
+                <MenuItem value="HIGH">High</MenuItem>
+              </Select>
+            </FormControl>
+
+            {(currentUser.role === 'AGENT' || currentUser.role === 'ADMIN') && (
+              <>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Status</InputLabel>
+                  <Select 
+                    name="status" 
+                    value={ticket.status} 
+                    onChange={handleChange} 
+                    label="Status"
+                  >
+                    <MenuItem value="OPEN">Open</MenuItem>
+                    <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+                    <MenuItem value="CLOSED">Closed</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth size="small">
+                  <InputLabel>Assign to Agent</InputLabel>
+                  <Select
+                    name="agentId"
+                    value={ticket.agentId || ''}
+                    onChange={handleChange}
+                    label="Assign to Agent"
+                    disabled={loadingAgents}
+                  >
+                    <MenuItem value=""><em>Unassigned</em></MenuItem>
+                    {agents.map(agent => (
+                      <MenuItem key={agent.id} value={agent.id}>
+                        {agent.firstName} {agent.lastName} ({agent.email})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </>
+            )}
           </Box>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Typography variant="body1" paragraph>
-            {ticket.description}
-          </Typography>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="caption">
-              Created: {formatDate(ticket.createdAt)}
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 400 }}>
+              {ticket.title}
             </Typography>
-            <Typography variant="caption">
-              Last updated: {formatDate(ticket.updatedAt)}
+
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Chip 
+                icon={getStatusIcon(ticket.status)}
+                label={ticket.status.replace('_', ' ')} 
+                color={
+                  ticket.status === 'OPEN' ? 'primary' :
+                  ticket.status === 'IN_PROGRESS' ? 'warning' : 'success'
+                } 
+                variant="outlined"
+                title={getStatusDescription(ticket.status)}
+              />
+              <Chip 
+                icon={getPriorityIcon(ticket.priority)}
+                label={ticket.priority} 
+                color={
+                  ticket.priority === 'HIGH' ? 'error' :
+                  ticket.priority === 'MEDIUM' ? 'warning' : 'success'
+                }
+                variant="outlined"
+                title={getPriorityDescription(ticket.priority)}
+              />
+            </Stack>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
+              {ticket.description}
             </Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Stack direction="row" justifyContent="space-between" spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                <Event fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Created: {formatDate(ticket.createdAt)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                <Update fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Updated: {formatDate(ticket.updatedAt)}
+              </Typography>
+            </Stack>
+
+            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                <Person fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                {getCustomerName()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                <AssignmentInd fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                {getAgentName(ticket.agentId)}
+              </Typography>
+            </Stack>
           </Box>
+        )}
+      </Paper>
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2">Customer: {getCustomerName()}</Typography>
-            <Typography variant="subtitle2">
-              Agent: {getAgentName(ticket.agentId)}
-            </Typography>
-          </Box>
-        </>
-      )}
-
-      <Divider sx={{ my: 3 }} />
-      <CommentList ticketId={ticket.id} />
-    </Paper>
+      {/* Comments Sidebar */}
+      <Paper elevation={3} sx={{ width: 400, p: 3, borderRadius: 2, height: 'fit-content' }}>
+        <CommentList ticketId={ticket.id} />
+      </Paper>
+    </Box>
   );
 };
 
