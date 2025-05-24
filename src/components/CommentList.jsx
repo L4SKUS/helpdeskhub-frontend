@@ -39,6 +39,7 @@ const CommentList = ({ ticketId }) => {
   const [error, setError] = useState(null);
   
   const currentUser = getCurrentUser();
+  const isAdmin = currentUser.role === 'ADMIN';
 
   useEffect(() => {
     fetchComments();
@@ -98,6 +99,10 @@ const CommentList = ({ ticketId }) => {
   const getAuthorName = (authorId) => {
     const user = users[authorId];
     return user ? `${user.firstName} ${user.lastName}` : `User ${authorId}`;
+  };
+
+  const canEditDelete = (comment) => {
+    return isAdmin || String(comment.authorId) === String(currentUser.id);
   };
 
   const handleCommentSubmit = async () => {
@@ -199,6 +204,11 @@ const CommentList = ({ ticketId }) => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle2">
                 {getAuthorName(comment.authorId)}
+                {isAdmin && comment.authorId !== currentUser.id && (
+                  <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                    (Admin Action)
+                  </Typography>
+                )}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {formatDate(comment.createdAt)}
@@ -243,7 +253,7 @@ const CommentList = ({ ticketId }) => {
                 <Typography variant="body1" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
                   {comment.content}
                 </Typography>
-                {String(comment.authorId) === String(currentUser.id) && (
+                {canEditDelete(comment) && (
                   <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
                     <Button
                       size="small"
@@ -298,10 +308,22 @@ const CommentList = ({ ticketId }) => {
         open={deleteDialogOpen}
         onClose={handleDeleteCancel}
       >
-        <DialogTitle>Delete Comment</DialogTitle>
+        <DialogTitle>
+          {isAdmin && commentToDelete?.authorId !== currentUser.id 
+            ? "Admin: Delete User Comment" 
+            : "Delete Comment"}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this comment? This action cannot be undone.
+            {isAdmin && commentToDelete?.authorId !== currentUser.id ? (
+              <>
+                You are about to delete another user's comment as an admin.
+                <br />
+                Are you sure you want to proceed?
+              </>
+            ) : (
+              "Are you sure you want to delete this comment? This action cannot be undone."
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

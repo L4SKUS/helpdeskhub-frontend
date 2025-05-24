@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Paper } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import TicketList from './TicketList';
-import UserManagement from './UserManagement'; // make sure this component exists
+import UserManagement from './UserManagement';
 import Login from './Login';
 import { login, logout, isAuthenticated, getCurrentUser } from '../services/authService';
 
 const Dashboard = () => {
   const [isAuthenticatedState, setIsAuthenticatedState] = useState(false);
   const [user, setUser] = useState(null);
-  const [view, setView] = useState('tickets'); // NEW
+  const [view, setView] = useState('tickets');
 
   useEffect(() => {
     const checkAuth = () => {
@@ -82,7 +82,7 @@ const Dashboard = () => {
       >
         <Box sx={{
           width: '100%',
-          maxWidth: 1000,
+          maxWidth: 1400,
           marginTop: 0
         }}>
           {view === 'tickets' && <TicketList />}
