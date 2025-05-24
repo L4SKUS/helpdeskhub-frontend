@@ -30,16 +30,12 @@ import {
 import {
   Refresh,
   Add,
-  Edit,
-  Delete,
-  ArrowBack,
   AssignmentInd,
   LowPriority,
   PriorityHigh,
   CheckCircle,
   HourglassEmpty,
   LockOpen,
-  Event,
   Update
 } from '@mui/icons-material';
 import TicketForm from './TicketForm';
@@ -60,7 +56,8 @@ const TicketList = () => {
     status: '',
     priority: '',
     agentId: '',
-    archive: false
+    archive: false,
+    showUnassignedOnly: false
   });
   const [needsRefresh, setNeedsRefresh] = useState(true);
 
@@ -171,8 +168,9 @@ const TicketList = () => {
   const getPriorityIcon = (priority) => {
     switch (priority) {
       case 'HIGH': return <PriorityHigh fontSize="small" />;
-      case 'MEDIUM': return <LowPriority fontSize="small" />;
-      case 'LOW': return <LowPriority fontSize="small" />;
+      case 'MEDIUM':
+      case 'LOW':
+        return <LowPriority fontSize="small" />;
       default: return null;
     }
   };
@@ -196,8 +194,16 @@ const TicketList = () => {
       filtered = filtered.filter(ticket => ticket.priority === filters.priority);
     }
 
-    if (filters.agentId) {
-      filtered = filtered.filter(ticket => ticket.agentId === parseInt(filters.agentId));
+    if (filters.agentId !== '') {
+      filtered = filtered.filter(ticket =>
+        filters.agentId === null
+          ? ticket.agentId === null
+          : ticket.agentId === parseInt(filters.agentId)
+      );
+    }
+
+    if (filters.showUnassignedOnly) {
+      filtered = filtered.filter(ticket => ticket.agentId === null);
     }
 
     return filtered.sort((a, b) => {

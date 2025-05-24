@@ -1,44 +1,26 @@
 import React from 'react';
 import {
   Box,
+  Paper,
   Typography,
-  Divider,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Button,
-  Paper,
+  FormGroup,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Divider,
+  Button
 } from '@mui/material';
+import { Refresh } from '@mui/icons-material';
 
 const Sidebar = ({ filters, setFilters, agents }) => {
-  const handleStatusChange = (event) => {
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
     setFilters(prev => ({
       ...prev,
-      status: event.target.value
-    }));
-  };
-
-  const handlePriorityChange = (event) => {
-    setFilters(prev => ({
-      ...prev,
-      priority: event.target.value
-    }));
-  };
-
-  const handleAgentChange = (event) => {
-    setFilters(prev => ({
-      ...prev,
-      agentId: event.target.value === "unassigned" ? null : event.target.value
-    }));
-  };
-
-  const handleArchiveToggle = (event) => {
-    setFilters(prev => ({
-      ...prev,
-      archive: event.target.checked
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -47,78 +29,96 @@ const Sidebar = ({ filters, setFilters, agents }) => {
       status: '',
       priority: '',
       agentId: '',
-      archive: false
+      archive: false,
+      showUnassignedOnly: false
     });
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 2, height: 'fit-content' }}>
+    <Paper elevation={2} sx={{ width: 240, p: 2, borderRadius: 2, height: 'fit-content'}}>
       <Typography variant="h6" gutterBottom>
         Filters
       </Typography>
       <Divider sx={{ mb: 2 }} />
-      
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <FormControl fullWidth size="small">
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={filters.status}
-            label="Status"
-            onChange={handleStatusChange}
-            disabled={filters.archive}
-          >
-            <MenuItem value="">All Statuses</MenuItem>
-            <MenuItem value="OPEN">Open</MenuItem>
-            <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-          </Select>
-        </FormControl>
 
-        <FormControl fullWidth size="small">
-          <InputLabel>Priority</InputLabel>
-          <Select
-            value={filters.priority}
-            label="Priority"
-            onChange={handlePriorityChange}
-          >
-            <MenuItem value="">All Priorities</MenuItem>
-            <MenuItem value="LOW">Low</MenuItem>
-            <MenuItem value="MEDIUM">Medium</MenuItem>
-            <MenuItem value="HIGH">High</MenuItem>
-          </Select>
-        </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Status</InputLabel>
+        <Select
+          name="status"
+          value={filters.status}
+          label="Status"
+          onChange={handleChange}
+        >
+          <MenuItem value="">All</MenuItem>
+          <MenuItem value="OPEN">Open</MenuItem>
+          <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+        </Select>
+      </FormControl>
 
-        <FormControl fullWidth size="small">
-          <InputLabel>Assigned To</InputLabel>
-          <Select
-            value={filters.agentId === null ? "unassigned" : filters.agentId}
-            label="Assigned To"
-            onChange={handleAgentChange}
-          >
-            <MenuItem value="">All Agents</MenuItem>
-            <MenuItem value="unassigned">Unassigned</MenuItem>
-            {agents.map(agent => (
-              <MenuItem key={agent.id} value={agent.id}>
-                {agent.firstName} {agent.lastName}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Priority</InputLabel>
+        <Select
+          name="priority"
+          value={filters.priority}
+          label="Priority"
+          onChange={handleChange}
+        >
+          <MenuItem value="">All</MenuItem>
+          <MenuItem value="LOW">Low</MenuItem>
+          <MenuItem value="MEDIUM">Medium</MenuItem>
+          <MenuItem value="HIGH">High</MenuItem>
+        </Select>
+      </FormControl>
 
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Assigned Agent</InputLabel>
+        <Select
+          name="agentId"
+          value={filters.agentId}
+          label="Assigned Agent"
+          onChange={handleChange}
+        >
+          <MenuItem value="">All</MenuItem>
+          <MenuItem value={null}>Unassigned</MenuItem>
+          {agents.map(agent => (
+            <MenuItem key={agent.id} value={agent.id}>
+              {agent.firstName} {agent.lastName}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Divider sx={{ my: 2 }} />
+
+      <FormGroup>
         <FormControlLabel
           control={
             <Checkbox
-              checked={filters.archive || false}
-              onChange={handleArchiveToggle}
+              checked={filters.showUnassignedOnly}
+              onChange={handleChange}
+              name="showUnassignedOnly"
+            />
+          }
+          label="Unassigned Only"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filters.archive}
+              onChange={handleChange}
+              name="archive"
             />
           }
           label="Show Closed Tickets"
         />
+      </FormGroup>
 
+      <Box mt={2}>
         <Button
-          variant="outlined"
-          onClick={handleResetFilters}
           fullWidth
-          sx={{ mt: 1 }}
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={handleResetFilters}
         >
           Reset Filters
         </Button>
