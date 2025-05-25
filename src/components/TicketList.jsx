@@ -169,8 +169,7 @@ const TicketList = () => {
     switch (priority) {
       case 'HIGH': return <PriorityHigh fontSize="small" />;
       case 'MEDIUM':
-      case 'LOW':
-        return <LowPriority fontSize="small" />;
+      case 'LOW': return <LowPriority fontSize="small" />;
       default: return null;
     }
   };
@@ -253,12 +252,8 @@ const TicketList = () => {
 
   return (
     <Box sx={{ display: 'flex', gap: 3, p: 2 }}>
-      <Sidebar 
-        filters={filters} 
-        setFilters={setFilters} 
-        agents={agents} 
-      />
-      
+      <Sidebar filters={filters} setFilters={setFilters} agents={agents} />
+
       <Paper elevation={3} sx={{ p: 3, flex: 1, borderRadius: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography variant="h5" sx={{ fontWeight: 300 }}>
@@ -269,12 +264,16 @@ const TicketList = () => {
               </Typography>
             )}
           </Typography>
-          
+
           <Stack direction="row" spacing={1}>
-            <IconButton 
-              onClick={handleRefresh} 
+            <IconButton
+              onClick={handleRefresh}
               title="Refresh"
-              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1
+              }}
             >
               <Refresh fontSize="small" />
             </IconButton>
@@ -310,7 +309,7 @@ const TicketList = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ width: '50px' }}>
+                  <TableCell sortDirection={orderBy === 'id' ? order : false}>
                     <TableSortLabel
                       active={orderBy === 'id'}
                       direction={orderBy === 'id' ? order : 'asc'}
@@ -319,8 +318,8 @@ const TicketList = () => {
                       ID
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '320px' }}>Title</TableCell>
-                  <TableCell sx={{ width: '120px' }}>
+                  <TableCell>Title</TableCell>
+                  <TableCell sortDirection={orderBy === 'agentId' ? order : false} sx={{ width: 120 }}>
                     <TableSortLabel
                       active={orderBy === 'agentId'}
                       direction={orderBy === 'agentId' ? order : 'asc'}
@@ -329,7 +328,7 @@ const TicketList = () => {
                       Assigned To
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '70px' }}>
+                  <TableCell sortDirection={orderBy === 'status' ? order : false}>
                     <TableSortLabel
                       active={orderBy === 'status'}
                       direction={orderBy === 'status' ? order : 'asc'}
@@ -338,7 +337,7 @@ const TicketList = () => {
                       Status
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '70px' }}>
+                  <TableCell sortDirection={orderBy === 'priority' ? order : false}>
                     <TableSortLabel
                       active={orderBy === 'priority'}
                       direction={orderBy === 'priority' ? order : 'asc'}
@@ -347,7 +346,7 @@ const TicketList = () => {
                       Priority
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sx={{ width: '200px' }}>
+                  <TableCell sortDirection={orderBy === 'updatedAt' ? order : false} sx={{ width: 200 }}>
                     <TableSortLabel
                       active={orderBy === 'updatedAt'}
                       direction={orderBy === 'updatedAt' ? order : 'desc'}
@@ -364,43 +363,50 @@ const TicketList = () => {
                     key={ticket.id}
                     hover
                     onClick={() => handleTitleClick(ticket.id)}
-                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                    sx={{
+                      cursor: 'pointer',
+                      '&:last-child td, &:last-child th': { border: 0 }
+                    }}
                   >
-                    <TableCell sx={{ width: '50px' }}>{ticket.id}</TableCell>
-                    <TableCell sx={{ width: '320px', fontWeight: 500 }}>{ticket.title}</TableCell>
-                    <TableCell sx={{ width: '120px' }}>
+                    <TableCell>{ticket.id}</TableCell>
+                    <TableCell sx={{ fontWeight: 500 }}>{ticket.title}</TableCell>
+                    <TableCell sx={{ width: 100 }}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <AssignmentInd fontSize="small" color="action" />
                         <span>{getAgentName(ticket.agentId)}</span>
                       </Stack>
                     </TableCell>
-                    <TableCell sx={{ width: '70px' }}>
+                    <TableCell>
                       <Chip
                         icon={getStatusIcon(ticket.status)}
                         label={ticket.status.replace('_', ' ')}
                         color={
-                          ticket.status === 'OPEN' ? 'primary' :
-                          ticket.status === 'IN_PROGRESS' ? 'warning' :
-                          'success'
+                          ticket.status === 'OPEN'
+                            ? 'primary'
+                            : ticket.status === 'IN_PROGRESS'
+                            ? 'warning'
+                            : 'success'
                         }
                         size="small"
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell sx={{ width: '70px' }}>
+                    <TableCell>
                       <Chip
                         icon={getPriorityIcon(ticket.priority)}
                         label={ticket.priority}
                         color={
-                          ticket.priority === 'HIGH' ? 'error' :
-                          ticket.priority === 'MEDIUM' ? 'warning' :
-                          'success'
+                          ticket.priority === 'HIGH'
+                            ? 'error'
+                            : ticket.priority === 'MEDIUM'
+                            ? 'warning'
+                            : 'success'
                         }
                         size="small"
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell sx={{ width: '200px' }}>
+                    <TableCell sx={{ width: 200 }}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <Update fontSize="small" color="action" />
                         <span>
@@ -418,7 +424,6 @@ const TicketList = () => {
                 ))}
               </TableBody>
             </Table>
-            <Divider sx={{ mb: 2 }} />
           </TableContainer>
         )}
 
