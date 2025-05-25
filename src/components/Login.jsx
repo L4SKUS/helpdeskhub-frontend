@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import bcrypt from 'bcryptjs';
 import { 
   Box, 
   TextField, 
@@ -23,6 +24,8 @@ const Login = ({ onLogin }) => {
     password: ''
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials(prev => ({
@@ -31,10 +34,21 @@ const Login = ({ onLogin }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onLogin(credentials);
+const FIXED_SALT = '$2a$10$KbQiZtWxqMZ9k2FvO6yLUO';
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const passwordHash = await bcrypt.hash(credentials.password, FIXED_SALT);
+
+  const userWithHash = {
+    email: credentials.email,
+    passwordHash
   };
+
+  onLogin(userWithHash);
+};
+
 
   return (
     <>
@@ -174,6 +188,7 @@ const Login = ({ onLogin }) => {
                 size="large"
                 fullWidth
                 startIcon={<LoginIcon />}
+                disabled={loading}
                 sx={{ 
                   py: 1.5,
                   borderRadius: 2,
@@ -187,7 +202,7 @@ const Login = ({ onLogin }) => {
                   }
                 }}
               >
-                Sign In
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </Box>
           </Paper>
