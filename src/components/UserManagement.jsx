@@ -119,7 +119,7 @@ const UserManagement = () => {
   return (
     <Box sx={{ display: 'flex', gap: 3, p: 2 }}>
       {/* Filter Sidebar */}
-      <Paper elevation={3} sx={{ p: 2, width: 250, borderRadius: 2, height: 'fit-content' }}>
+      <Paper elevation={3} sx={{ p: 2, width: 240, borderRadius: 2, height: 'fit-content' }}>
         <Typography variant="h6" gutterBottom>Filter Users</Typography>
         <Divider sx={{ mb: 2 }} />
         

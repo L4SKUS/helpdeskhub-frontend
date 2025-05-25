@@ -274,11 +274,7 @@ const TicketList = () => {
             <IconButton 
               onClick={handleRefresh} 
               title="Refresh"
-              sx={{ 
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 1
-              }}
+              sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
             >
               <Refresh fontSize="small" />
             </IconButton>
@@ -314,7 +310,7 @@ const TicketList = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sortDirection={orderBy === 'id' ? order : false}>
+                  <TableCell sx={{ width: '50px' }}>
                     <TableSortLabel
                       active={orderBy === 'id'}
                       direction={orderBy === 'id' ? order : 'asc'}
@@ -323,8 +319,8 @@ const TicketList = () => {
                       ID
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell>Title</TableCell>
-                  <TableCell sortDirection={orderBy === 'agentId' ? order : false}>
+                  <TableCell sx={{ width: '320px' }}>Title</TableCell>
+                  <TableCell sx={{ width: '120px' }}>
                     <TableSortLabel
                       active={orderBy === 'agentId'}
                       direction={orderBy === 'agentId' ? order : 'asc'}
@@ -333,7 +329,7 @@ const TicketList = () => {
                       Assigned To
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sortDirection={orderBy === 'status' ? order : false}>
+                  <TableCell sx={{ width: '70px' }}>
                     <TableSortLabel
                       active={orderBy === 'status'}
                       direction={orderBy === 'status' ? order : 'asc'}
@@ -342,7 +338,7 @@ const TicketList = () => {
                       Status
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sortDirection={orderBy === 'priority' ? order : false}>
+                  <TableCell sx={{ width: '70px' }}>
                     <TableSortLabel
                       active={orderBy === 'priority'}
                       direction={orderBy === 'priority' ? order : 'asc'}
@@ -351,7 +347,7 @@ const TicketList = () => {
                       Priority
                     </TableSortLabel>
                   </TableCell>
-                  <TableCell sortDirection={orderBy === 'updatedAt' ? order : false}>
+                  <TableCell sx={{ width: '200px' }}>
                     <TableSortLabel
                       active={orderBy === 'updatedAt'}
                       direction={orderBy === 'updatedAt' ? order : 'desc'}
@@ -368,20 +364,17 @@ const TicketList = () => {
                     key={ticket.id}
                     hover
                     onClick={() => handleTitleClick(ticket.id)}
-                    sx={{ 
-                      cursor: 'pointer',
-                      '&:last-child td, &:last-child th': { border: 0 }
-                    }}
+                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
                   >
-                    <TableCell>{ticket.id}</TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>{ticket.title}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: '50px' }}>{ticket.id}</TableCell>
+                    <TableCell sx={{ width: '320px', fontWeight: 500 }}>{ticket.title}</TableCell>
+                    <TableCell sx={{ width: '120px' }}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <AssignmentInd fontSize="small" color="action" />
                         <span>{getAgentName(ticket.agentId)}</span>
                       </Stack>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: '70px' }}>
                       <Chip
                         icon={getStatusIcon(ticket.status)}
                         label={ticket.status.replace('_', ' ')}
@@ -394,7 +387,7 @@ const TicketList = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: '70px' }}>
                       <Chip
                         icon={getPriorityIcon(ticket.priority)}
                         label={ticket.priority}
@@ -407,7 +400,7 @@ const TicketList = () => {
                         variant="outlined"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ width: '200px' }}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <Update fontSize="small" color="action" />
                         <span>
@@ -425,6 +418,7 @@ const TicketList = () => {
                 ))}
               </TableBody>
             </Table>
+            <Divider sx={{ mb: 2 }} />
           </TableContainer>
         )}
 
