@@ -23,11 +23,6 @@ export const getUserById = async (userId) => {
   }
 };
 
-export const getCurrentUserDetails = async () => {
-  const { id } = getCurrentUser();
-  return await getUserById(id);
-};
-
 export const getAgents = async() => {
   return api.get(`${API_URL}/agents`)
     .then(response => response.data)
@@ -37,7 +32,7 @@ export const getAgents = async() => {
     });
 };
 
-export const getCustomer = (id) => {
+export const getUser = (id) => {
   return api.get(`${API_URL}/${id}`)
     .then(response => response.data)
     .catch(error => {
@@ -77,6 +72,15 @@ export const deleteUser = async (id) => {
   return api.delete(`${API_URL}/${id}`)
     .catch(error => {
       console.error('Delete error:', error);
+      throw error;
+    });
+};
+
+export const changePassword = async ({ id, currentPasswordHash, newPasswordHash }) => {
+  return api.put(`${API_URL}/${id}/password`, { currentPasswordHash, newPasswordHash })
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Change password error:', error);
       throw error;
     });
 };

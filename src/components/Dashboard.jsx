@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Box, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
   IconButton,
   Menu,
   MenuItem,
@@ -15,10 +15,13 @@ import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   ExitToApp as LogoutIcon,
-  AccountCircle as AccountIcon
+  AccountCircle as AccountIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
+
 import TicketList from './TicketList';
 import UserManagement from './UserManagement';
+import ChangePassword from './ChangePassword';
 import Login from './Login';
 import { login, logout, isAuthenticated, getCurrentUser } from '../services/authService';
 
@@ -82,18 +85,28 @@ const Dashboard = () => {
       bgcolor: 'background.default',
       width: '100vw',
     }}>
-      <AppBar 
-        position="static" 
-        sx={{ 
+      <AppBar
+        position="static"
+        sx={{
           flexShrink: 0,
           background: 'linear-gradient(45deg, #2c3e50 0%, #4a6491 100%)',
           boxShadow: 'none'
         }}
       >
         <Toolbar>
-          <Typography 
-            variant="h6" 
-            sx={{ 
+          {view === 'changePassword' && (
+            <IconButton
+              color="inherit"
+              onClick={() => setView('tickets')}
+              sx={{ mr: 2 }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+          )}
+
+          <Typography
+            variant="h6"
+            sx={{
               flexGrow: 1,
               display: 'flex',
               alignItems: 'center',
@@ -102,13 +115,13 @@ const Dashboard = () => {
           >
             <DashboardIcon /> HelpDeskHub
           </Typography>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {user?.role === 'ADMIN' && (
               <IconButton
                 color="inherit"
                 onClick={() => setView(view === 'users' ? 'tickets' : 'users')}
-                sx={{ 
+                sx={{
                   borderRadius: 1,
                   bgcolor: view === 'users' ? 'rgba(255,255,255,0.1)' : 'transparent'
                 }}
@@ -116,7 +129,7 @@ const Dashboard = () => {
                 <PeopleIcon />
               </IconButton>
             )}
-            
+
             <IconButton
               onClick={handleMenuOpen}
               size="small"
@@ -125,9 +138,9 @@ const Dashboard = () => {
               aria-haspopup="true"
               aria-expanded={open ? 'true' : undefined}
             >
-              <Avatar 
-                sx={{ 
-                  width: 32, 
+              <Avatar
+                sx={{
+                  width: 32,
                   height: 32,
                   bgcolor: 'primary.main'
                 }}
@@ -187,6 +200,10 @@ const Dashboard = () => {
                 {view === 'users' ? 'View Tickets' : 'Manage Users'}
               </MenuItem>
             )}
+            <MenuItem onClick={() => handleViewChange('changePassword')}>
+              <AccountIcon sx={{ mr: 1 }} />
+              Change Password
+            </MenuItem>
             <MenuItem onClick={handleLogout}>
               <LogoutIcon sx={{ mr: 1 }} />
               Logout
@@ -214,6 +231,7 @@ const Dashboard = () => {
         }}>
           {view === 'tickets' && <TicketList />}
           {view === 'users' && user?.role === 'ADMIN' && <UserManagement />}
+          {view === 'changePassword' && <ChangePassword />}
         </Box>
       </Box>
     </Box>

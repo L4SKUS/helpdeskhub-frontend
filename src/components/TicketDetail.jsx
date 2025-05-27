@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 import { updateTicket } from '../services/ticketService';
 import { getCurrentUser } from '../services/authService';
-import { getAgents, getCustomer } from '../services/userService';
+import { getAgents, getUser } from '../services/userService';
 import CommentList from './CommentList';
 
 const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => {
@@ -66,7 +66,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
     if (!ticket.customerId) return;
     setLoadingCustomer(true);
     try {
-      const customerData = await getCustomer(ticket.customerId);
+      const customerData = await getUser(ticket.customerId);
       setCustomer(customerData);
     } catch (error) {
       console.error('Error fetching customer:', error);

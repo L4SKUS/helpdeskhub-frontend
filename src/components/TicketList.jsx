@@ -424,6 +424,7 @@ const TicketList = () => {
                 ))}
               </TableBody>
             </Table>
+            <Divider sx={{ mb: 2 }} />
           </TableContainer>
         )}
 

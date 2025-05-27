@@ -3,15 +3,18 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, MenuItem
 } from '@mui/material';
+import bcrypt from 'bcryptjs';
 
 const roles = ['ADMIN', 'AGENT', 'CUSTOMER'];
+
+const FIXED_SALT = '$2a$10$KbQiZtWxqMZ9k2FvO6yLUO';
 
 const UserForm = ({ open, onClose, onSubmit, user }) => {
   const isEdit = Boolean(user);
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phoneNumber: '',
-    password: '', role: 'CUSTOMER'
+    passwordHash: '', role: 'CUSTOMER'
   });
 
   useEffect(() => {
@@ -20,7 +23,7 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
     } else {
       setFormData({
         firstName: '', lastName: '', email: '',
-        phoneNumber: '', password: '', role: 'CUSTOMER'
+        phoneNumber: '', passwordHash: '', role: 'CUSTOMER'
       });
     }
   }, [user]);
@@ -29,14 +32,19 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const cleanedData = { ...formData };
-    if (isEdit && cleanedData.password.trim() === '') {
-      cleanedData.password = null;
+
+    if (cleanedData.password.trim()) {
+      const passwordHash = await bcrypt.hash(cleanedData.password, FIXED_SALT);
+      cleanedData.passwordHash = passwordHash;
     }
+
+    // Don't include the plain password
+    delete cleanedData.password;
+
     onSubmit(cleanedData);
   };
-  
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth>
