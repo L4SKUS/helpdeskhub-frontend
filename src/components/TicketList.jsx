@@ -258,11 +258,6 @@ const TicketList = () => {
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography variant="h5" sx={{ fontWeight: 300 }}>
             Tickets
-            {currentUser.role === 'CUSTOMER' && (
-              <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                (Your tickets)
-              </Typography>
-            )}
           </Typography>
 
           <Stack direction="row" spacing={1}>
