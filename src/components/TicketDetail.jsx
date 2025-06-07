@@ -243,7 +243,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
             ) : (
               <>
                 <Button 
-                  variant="outlined" 
+                  variant="outlined"
                   startIcon={<Cancel />} 
                   onClick={() => setIsEditing(false)} 
                   disabled={loading}

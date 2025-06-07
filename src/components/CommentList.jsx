@@ -10,9 +10,10 @@ import {
   DialogContentText,
   DialogTitle,
   CircularProgress,
-  Box
+  Box,
+  IconButton
 } from '@mui/material';
-import { Edit, Delete, Save, Cancel } from '@mui/icons-material';
+import { Edit, Delete, Save, Cancel, Refresh } from '@mui/icons-material';
 
 import {
   getCommentsByTicket,
@@ -39,7 +40,7 @@ const CommentList = ({ ticketId }) => {
     users: false
   });
   const [error, setError] = useState(null);
-  
+
   const currentUser = getCurrentUser();
   const isAdmin = currentUser.role === 'ADMIN';
 
@@ -56,7 +57,7 @@ const CommentList = ({ ticketId }) => {
     try {
       setLoading(prev => ({ ...prev, comments: true }));
       const data = await getCommentsByTicket(ticketId);
-      const sortedComments = [...data].sort((a, b) => 
+      const sortedComments = [...data].sort((a, b) =>
         new Date(a.createdAt) - new Date(b.createdAt)
       );
       setComments(sortedComments);
@@ -73,7 +74,7 @@ const CommentList = ({ ticketId }) => {
     try {
       setLoading(prev => ({ ...prev, users: true }));
       const newUsers = { ...users };
-      
+
       await Promise.all(userIds.map(async (userId) => {
         if (!newUsers[userId]) {
           try {
@@ -85,7 +86,7 @@ const CommentList = ({ ticketId }) => {
           }
         }
       }));
-      
+
       setUsers(newUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -133,7 +134,6 @@ const CommentList = ({ ticketId }) => {
         ticketTitle: ticket.title,
         commentText: createdComment.content
       }).catch(console.error);
-      
 
     } catch (error) {
       console.error('Failed to post comment:', error);
@@ -196,28 +196,42 @@ const CommentList = ({ ticketId }) => {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h6" gutterBottom>Comments</Typography>
-      
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h6">Comments</Typography>
+        <IconButton
+          onClick={fetchComments}
+          title="Refresh"
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1
+          }}
+          disabled={loading.comments}
+        >
+          {loading.comments ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+        </IconButton>
+      </Box>
+
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
           {error}
         </Typography>
       )}
-      
+
       {loading.comments && !comments.length ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
           <CircularProgress />
         </Box>
       ) : (
         comments.map(comment => (
-          <Paper 
-            key={comment.id} 
-            sx={{ 
-              p: 2, 
-              mb: 2, 
+          <Paper
+            key={comment.id}
+            sx={{
+              p: 2,
+              mb: 2,
               position: 'relative',
               border: editingCommentId === comment.id ? '1px solid #1976d2' : undefined
-            }} 
+            }}
             variant="outlined"
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -325,8 +339,8 @@ const CommentList = ({ ticketId }) => {
 
       <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
         <DialogTitle>
-          {isAdmin && commentToDelete?.authorId !== currentUser.id 
-            ? "Admin: Delete User Comment" 
+          {isAdmin && commentToDelete?.authorId !== currentUser.id
+            ? "Admin: Delete User Comment"
             : "Delete Comment"}
         </DialogTitle>
         <DialogContent>

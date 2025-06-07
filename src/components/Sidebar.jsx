@@ -99,7 +99,7 @@ const Sidebar = ({ filters, setFilters, employees }) => {
               name="showUnassignedOnly"
             />
           }
-          label="Unassigned Only"
+          label="Unassigned only"
         />
         <FormControlLabel
           control={
@@ -109,7 +109,7 @@ const Sidebar = ({ filters, setFilters, employees }) => {
               name="archive"
             />
           }
-          label="Show Closed Tickets"
+          label="Show closed tickets"
         />
       </FormGroup>
 
