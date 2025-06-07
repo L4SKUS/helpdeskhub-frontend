@@ -37,8 +37,6 @@ export const logout = () => {
 export const isAuthenticated = () => {
   const token = localStorage.getItem('authToken');
   if (!token) return false;
-
-  // Optional: Add JWT expiration check here if needed
   return true;
 };
 

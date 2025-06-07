@@ -58,12 +58,11 @@ const TicketForm = ({ open, ticket, onSuccess, onClose }) => {
         title: formData.title,
         description: formData.description,
         priority: formData.priority,
-        status: 'OPEN' // Always set to OPEN for new tickets
+        status: 'OPEN'
       };
 
-      // For new tickets, add the current user's ID as customerId
       if (!ticket) {
-        payload.customerId = currentUser.id;
+        payload.clientId = currentUser.id;
       }
 
       const result = ticket ? 

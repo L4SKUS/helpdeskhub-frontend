@@ -14,7 +14,6 @@ api.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-// CREATE - POST /api/tickets
 export const createTicket = (ticketData) => {
   return api.post(API_URL, ticketData)
     .then(response => response.data)
@@ -24,21 +23,18 @@ export const createTicket = (ticketData) => {
     });
 };
 
-// READ ALL - GET /api/tickets
 export const getTickets = () => {
   return api.get(API_URL)
     .then(response => response.data)
     .catch(error => {
       console.error('Fetch error:', error);
       if (error.response?.status === 401) {
-        // Handle unauthorized access
         throw new Error('Session expired. Please login again.');
       }
       throw error;
     });
 };
 
-// READ ONE - GET /api/tickets/{id}
 export const getTicket = (id) => {
   return api.get(`${API_URL}/${id}`)
     .then(response => response.data)
@@ -48,7 +44,6 @@ export const getTicket = (id) => {
     });
 };
 
-// UPDATE - PUT /api/tickets/{id}
 export const updateTicket = (id, ticketData) => {
   return api.put(`${API_URL}/${id}`, ticketData)
     .then(response => response.data)
@@ -58,7 +53,6 @@ export const updateTicket = (id, ticketData) => {
     });
 };
 
-// DELETE - DELETE /api/tickets/{id}
 export const deleteTicket = (id) => {
   return api.delete(`${API_URL}/${id}`)
     .then(response => response.data)
@@ -68,9 +62,9 @@ export const deleteTicket = (id) => {
     });
 };
 
-export const getTicketsByCustomer = async (customerId) => {
+export const getTicketsByClient = async (clientId) => {
   try {
-    const response = await fetch(`${API_URL}/customer/${customerId}`, {
+    const response = await fetch(`${API_URL}/client/${clientId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -87,9 +81,9 @@ export const getTicketsByCustomer = async (customerId) => {
   }
 };
 
-export const getTicketsByAgent = async (agentId) => {
+export const getTicketsByEmployee = async (employeeId) => {
   try {
-    const response = await fetch(`${API_URL}/agent/${agentId}`, {
+    const response = await fetch(`${API_URL}/employee/${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
       }
@@ -104,12 +98,4 @@ export const getTicketsByAgent = async (agentId) => {
     console.error('Error fetching tickets:', error);
     throw error;
   }
-};
-
-export default {
-  createTicket,
-  getTickets,
-  getTicket,
-  updateTicket,
-  deleteTicket
 };

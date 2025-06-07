@@ -14,7 +14,6 @@ api.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-// CREATE - POST /api/comments
 export const createComment = (commentData) => {
   return api.post(API_URL, commentData)
     .then(response => response.data)
@@ -24,21 +23,18 @@ export const createComment = (commentData) => {
     });
 };
 
-// READ ALL - GET /api/comments
 export const getComments = () => {
   return api.get(API_URL)
     .then(response => response.data)
     .catch(error => {
       console.error('Fetch error:', error);
       if (error.response?.status === 401) {
-        // Handle unauthorized access
         throw new Error('Session expired. Please login again.');
       }
       throw error;
     });
 };
 
-// UPDATE - PUT /api/comments/{id}
 export const updateComment = (id, commentData) => {
   return api.put(`${API_URL}/${id}`, commentData)
     .then(response => response.data)
@@ -48,7 +44,6 @@ export const updateComment = (id, commentData) => {
     });
 };
 
-// DELETE - DELETE /api/comments/{id}
 export const deleteComment = (id) => {
   return api.delete(`${API_URL}/${id}`)
     .then(response => response.data)
@@ -75,11 +70,4 @@ export const getCommentsByTicket = async (ticketId) => {
     console.error('Error fetching comments:', error);
     throw error;
   }
-};
-
-export default {
-  createComment,
-  getComments,
-  updateComment,
-  deleteComment
 };

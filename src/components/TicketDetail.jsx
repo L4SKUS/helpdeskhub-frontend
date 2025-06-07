@@ -32,46 +32,46 @@ import {
 } from '@mui/icons-material';
 import { updateTicket } from '../services/ticketService';
 import { getCurrentUser } from '../services/authService';
-import { getAgents, getUser } from '../services/userService';
+import { getEmployees, getUser } from '../services/userService';
 import CommentList from './CommentList';
 
 const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => {
   const [ticket, setTicket] = useState(initialTicket);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [agents, setAgents] = useState([]);
-  const [customer, setCustomer] = useState(null);
-  const [loadingAgents, setLoadingAgents] = useState(false);
-  const [loadingCustomer, setLoadingCustomer] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [client, setClient] = useState(null);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [loadingClient, setLoadingClient] = useState(false);
   const currentUser = getCurrentUser();
 
   useEffect(() => {
-    fetchAgents();
-    fetchCustomer();
+    fetchEmployees();
+    fetchClient();
   }, [ticket]);
 
-  const fetchAgents = async () => {
-    setLoadingAgents(true);
+  const fetchEmployees = async () => {
+    setLoadingEmployees(true);
     try {
-      const agentsList = await getAgents();
-      setAgents(agentsList);
+      const employeesList = await getEmployees();
+      setEmployees(employeesList);
     } catch (error) {
-      console.error('Error fetching agents:', error);
+      console.error('Error fetching employees:', error);
     } finally {
-      setLoadingAgents(false);
+      setLoadingEmployees(false);
     }
   };
 
-  const fetchCustomer = async () => {
-    if (!ticket.customerId) return;
-    setLoadingCustomer(true);
+  const fetchClient = async () => {
+    if (!ticket.clientId) return;
+    setLoadingClient(true);
     try {
-      const customerData = await getUser(ticket.customerId);
-      setCustomer(customerData);
+      const clientData = await getUser(ticket.clientId);
+      setClient(clientData);
     } catch (error) {
-      console.error('Error fetching customer:', error);
+      console.error('Error fetching client:', error);
     } finally {
-      setLoadingCustomer(false);
+      setLoadingClient(false);
     }
   };
 
@@ -89,9 +89,9 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
         priority: ticket.priority
       };
 
-      if (currentUser.role !== 'CUSTOMER') {
+      if (currentUser.role !== 'CLIENT') {
         updateData.status = ticket.status;
-        updateData.agentId = ticket.agentId ? parseInt(ticket.agentId) : null;
+        updateData.employeeId = ticket.employeeId ? parseInt(ticket.employeeId) : null;
       }
 
       const updatedTicket = await updateTicket(ticket.id, updateData);
@@ -128,19 +128,19 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const canEdit = () => ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
-  const canDelete = () => ['CUSTOMER', 'AGENT', 'ADMIN'].includes(currentUser.role);
+  const canEdit = () => ['CLIENT', 'EMPLOYEE', 'ADMIN'].includes(currentUser.role);
+  const canDelete = () => ['CLIENT', 'EMPLOYEE', 'ADMIN'].includes(currentUser.role);
 
-  const getAgentName = (agentId) => {
-    if (!agentId) return 'Unassigned';
-    const agent = agents.find(a => a.id === agentId);
-    return agent ? `${agent.firstName} ${agent.lastName}` : 'Loading agent...';
+  const getEmployeeName = (employeeId) => {
+    if (!employeeId) return 'Unassigned';
+    const employee = employees.find(a => a.id === employeeId);
+    return employee ? `${employee.firstName} ${employee.lastName}` : 'Loading employee...';
   };
 
-  const getCustomerName = () => {
-    if (!ticket.customerId) return 'Unknown customer';
-    if (loadingCustomer) return 'Loading customer...';
-    return customer ? `${customer.firstName} ${customer.lastName}` : `Customer ${ticket.customerId}`;
+  const getClientName = () => {
+    if (!ticket.clientId) return 'Unknown client';
+    if (loadingClient) return 'Loading client...';
+    return client ? `${client.firstName} ${client.lastName}` : `Client ${ticket.clientId}`;
   };
 
   const getStatusIcon = (status) => {
@@ -277,7 +277,7 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
               </Select>
             </FormControl>
 
-            {(currentUser.role === 'AGENT' || currentUser.role === 'ADMIN') && (
+            {(currentUser.role === 'EMPLOYEE' || currentUser.role === 'ADMIN') && (
               <>
                 <FormControl fullWidth size="small">
                   <InputLabel>Status</InputLabel>
@@ -294,18 +294,18 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
                 </FormControl>
 
                 <FormControl fullWidth size="small">
-                  <InputLabel>Assign to Agent</InputLabel>
+                  <InputLabel>Assign to Employee</InputLabel>
                   <Select
-                    name="agentId"
-                    value={ticket.agentId || ''}
+                    name="employeeId"
+                    value={ticket.employeeId || ''}
                     onChange={handleChange}
-                    label="Assign to Agent"
-                    disabled={loadingAgents}
+                    label="Assign to Employee"
+                    disabled={loadingEmployees}
                   >
                     <MenuItem value=""><em>Unassigned</em></MenuItem>
-                    {agents.map(agent => (
-                      <MenuItem key={agent.id} value={agent.id}>
-                        {agent.firstName} {agent.lastName} ({agent.email})
+                    {employees.map(employee => (
+                      <MenuItem key={employee.id} value={employee.id}>
+                        {employee.firstName} {employee.lastName} ({employee.email})
                       </MenuItem>
                     ))}
                   </Select>
@@ -364,11 +364,11 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
             <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 <Person fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                {getCustomerName()}
+                {getClientName()}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 <AssignmentInd fontSize="small" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                {getAgentName(ticket.agentId)}
+                {getEmployeeName(ticket.employeeId)}
               </Typography>
             </Stack>
           </Box>

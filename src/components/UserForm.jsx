@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import bcrypt from 'bcryptjs';
 
-const roles = ['ADMIN', 'AGENT', 'CUSTOMER'];
+const roles = ['ADMIN', 'EMPLOYEE', 'CLIENT'];
 
 const FIXED_SALT = '$2a$10$KbQiZtWxqMZ9k2FvO6yLUO';
 
@@ -14,7 +14,7 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phoneNumber: '',
-    passwordHash: '', role: 'CUSTOMER'
+    passwordHash: '', role: 'CLIENT'
   });
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
     } else {
       setFormData({
         firstName: '', lastName: '', email: '',
-        phoneNumber: '', passwordHash: '', role: 'CUSTOMER'
+        phoneNumber: '', passwordHash: '', role: 'CLIENT'
       });
     }
   }, [user]);
@@ -40,7 +40,6 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
       cleanedData.passwordHash = passwordHash;
     }
 
-    // Don't include the plain password
     delete cleanedData.password;
 
     onSubmit(cleanedData);

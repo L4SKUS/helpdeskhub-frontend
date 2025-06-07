@@ -93,8 +93,8 @@ const UserManagement = () => {
   const getRoleIcon = (role) => {
     switch (role) {
       case 'ADMIN': return <AdminPanelSettings fontSize="small" />;
-      case 'AGENT': return <Engineering fontSize="small" />;
-      case 'CUSTOMER': return <PersonOutline fontSize="small" />;
+      case 'EMPLOYEE': return <Engineering fontSize="small" />;
+      case 'CLIENT': return <PersonOutline fontSize="small" />;
       default: return <Person fontSize="small" />;
     }
   };
@@ -102,8 +102,8 @@ const UserManagement = () => {
   const getRoleColor = (role) => {
     switch (role) {
       case 'ADMIN': return 'primary';
-      case 'AGENT': return 'secondary';
-      case 'CUSTOMER': return 'success';
+      case 'EMPLOYEE': return 'secondary';
+      case 'CLIENT': return 'success';
       default: return 'default';
     }
   };
@@ -132,8 +132,8 @@ const UserManagement = () => {
           >
             <MenuItem value="">All Roles</MenuItem>
             <MenuItem value="ADMIN">Admin</MenuItem>
-            <MenuItem value="AGENT">Agent</MenuItem>
-            <MenuItem value="CUSTOMER">Customer</MenuItem>
+            <MenuItem value="EMPLOYEE">Employee</MenuItem>
+            <MenuItem value="CLIENT">Client</MenuItem>
           </Select>
         </FormControl>
 

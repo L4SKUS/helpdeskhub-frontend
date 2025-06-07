@@ -23,8 +23,8 @@ export const getUserById = async (userId) => {
   }
 };
 
-export const getAgents = async() => {
-  return api.get(`${API_URL}/agents`)
+export const getEmployees = async() => {
+  return api.get(`${API_URL}/employees`)
     .then(response => response.data)
     .catch(error => {
       console.error('Fetch error:', error);

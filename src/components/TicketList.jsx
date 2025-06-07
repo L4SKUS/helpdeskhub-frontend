@@ -4,9 +4,9 @@ import {
   getTicket,
   deleteTicket,
   updateTicket,
-  getTicketsByCustomer
+  getTicketsByClient
 } from '../services/ticketService';
-import { getAgents } from '../services/userService';
+import { getEmployees } from '../services/userService';
 import { getCurrentUser, logout } from '../services/authService';
 import {
   Table,
@@ -44,7 +44,7 @@ import Sidebar from './Sidebar';
 
 const TicketList = () => {
   const [tickets, setTickets] = useState([]);
-  const [agents, setAgents] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
@@ -55,7 +55,7 @@ const TicketList = () => {
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
-    agentId: '',
+    employeeId: '',
     archive: false,
     showUnassignedOnly: false
   });
@@ -70,16 +70,16 @@ const TicketList = () => {
       try {
         setLoading(true);
         let ticketsData;
-        const agentsData = await getAgents();
+        const employeesData = await getEmployees();
 
-        if (currentUser.role === 'CUSTOMER') {
-          ticketsData = await getTicketsByCustomer(currentUser.id);
+        if (currentUser.role === 'CLIENT') {
+          ticketsData = await getTicketsByClient(currentUser.id);
         } else {
           ticketsData = await getTickets();
         }
 
         setTickets(ticketsData);
-        setAgents(agentsData);
+        setEmployees(employeesData);
         setError(null);
         setNeedsRefresh(false);
       } catch (error) {
@@ -132,7 +132,7 @@ const TicketList = () => {
       const result = await updateTicket(updatedTicket.id, {
         status: updatedTicket.status,
         priority: updatedTicket.priority,
-        agentId: updatedTicket.agentId ? parseInt(updatedTicket.agentId) : null
+        employeeId: updatedTicket.employeeId ? parseInt(updatedTicket.employeeId) : null
       });
       setTickets(prev => prev.map(t => t.id === result.id ? result : t));
       setError(null);
@@ -193,16 +193,16 @@ const TicketList = () => {
       filtered = filtered.filter(ticket => ticket.priority === filters.priority);
     }
 
-    if (filters.agentId !== '') {
+    if (filters.employeeId !== '') {
       filtered = filtered.filter(ticket =>
-        filters.agentId === null
-          ? ticket.agentId === null
-          : ticket.agentId === parseInt(filters.agentId)
+        filters.employeeId === null
+          ? ticket.employeeId === null
+          : ticket.employeeId === parseInt(filters.employeeId)
       );
     }
 
     if (filters.showUnassignedOnly) {
-      filtered = filtered.filter(ticket => ticket.agentId === null);
+      filtered = filtered.filter(ticket => ticket.employeeId === null);
     }
 
     return filtered.sort((a, b) => {
@@ -226,9 +226,9 @@ const TicketList = () => {
     });
   }, [tickets, filters, orderBy, order]);
 
-  const getAgentName = (agentId) => {
-    const agent = agents.find(a => a.id === agentId);
-    return agent ? `${agent.firstName} ${agent.lastName}` : 'Unassigned';
+  const getEmployeeName = (employeeId) => {
+    const employee = employees.find(a => a.id === employeeId);
+    return employee ? `${employee.firstName} ${employee.lastName}` : 'Unassigned';
   };
 
   if (loading) {
@@ -252,7 +252,7 @@ const TicketList = () => {
 
   return (
     <Box sx={{ display: 'flex', gap: 3, p: 2 }}>
-      <Sidebar filters={filters} setFilters={setFilters} agents={agents} />
+      <Sidebar filters={filters} setFilters={setFilters} employees={employees} />
 
       <Paper elevation={3} sx={{ p: 3, flex: 1, borderRadius: 2 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -314,11 +314,11 @@ const TicketList = () => {
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>Title</TableCell>
-                  <TableCell sortDirection={orderBy === 'agentId' ? order : false} sx={{ width: 120 }}>
+                  <TableCell sortDirection={orderBy === 'employeeId' ? order : false} sx={{ width: 120 }}>
                     <TableSortLabel
-                      active={orderBy === 'agentId'}
-                      direction={orderBy === 'agentId' ? order : 'asc'}
-                      onClick={() => handleSort('agentId')}
+                      active={orderBy === 'employeeId'}
+                      direction={orderBy === 'employeeId' ? order : 'asc'}
+                      onClick={() => handleSort('employeeId')}
                     >
                       Assigned To
                     </TableSortLabel>
@@ -368,7 +368,7 @@ const TicketList = () => {
                     <TableCell sx={{ width: 100 }}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <AssignmentInd fontSize="small" color="action" />
-                        <span>{getAgentName(ticket.agentId)}</span>
+                        <span>{getEmployeeName(ticket.employeeId)}</span>
                       </Stack>
                     </TableCell>
                     <TableCell>

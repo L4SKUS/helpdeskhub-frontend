@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 
-const Sidebar = ({ filters, setFilters, agents }) => {
+const Sidebar = ({ filters, setFilters, employees }) => {
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
     setFilters(prev => ({
@@ -28,7 +28,7 @@ const Sidebar = ({ filters, setFilters, agents }) => {
     setFilters({
       status: '',
       priority: '',
-      agentId: '',
+      employeeId: '',
       archive: false,
       showUnassignedOnly: false
     });
@@ -71,18 +71,18 @@ const Sidebar = ({ filters, setFilters, agents }) => {
       </FormControl>
 
       <FormControl fullWidth margin="normal">
-        <InputLabel>Assigned Agent</InputLabel>
+        <InputLabel>Assigned Employee</InputLabel>
         <Select
-          name="agentId"
-          value={filters.agentId}
-          label="Assigned Agent"
+          name="employeeId"
+          value={filters.employeeId}
+          label="Assigned Employee"
           onChange={handleChange}
         >
           <MenuItem value="">All</MenuItem>
           <MenuItem value={null}>Unassigned</MenuItem>
-          {agents.map(agent => (
-            <MenuItem key={agent.id} value={agent.id}>
-              {agent.firstName} {agent.lastName}
+          {employees.map(employee => (
+            <MenuItem key={employee.id} value={employee.id}>
+              {employee.firstName} {employee.lastName}
             </MenuItem>
           ))}
         </Select>
