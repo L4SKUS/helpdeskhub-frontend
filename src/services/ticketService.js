@@ -35,7 +35,7 @@ export const getTickets = () => {
     });
 };
 
-export const getTicket = (id) => {
+export const getTicketById = (id) => {
   return api.get(`${API_URL}/${id}`)
     .then(response => response.data)
     .catch(error => {

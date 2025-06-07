@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   getTickets,
-  getTicket,
+  getTicketById,
   deleteTicket,
   updateTicket,
   getTicketsByClient
@@ -105,7 +105,7 @@ const TicketList = () => {
 
   const handleTitleClick = async (id) => {
     try {
-      const ticket = await getTicket(id);
+      const ticket = await getTicketById(id);
       setSelectedTicket(ticket);
       setError(null);
     } catch (error) {
@@ -320,7 +320,7 @@ const TicketList = () => {
                       direction={orderBy === 'employeeId' ? order : 'asc'}
                       onClick={() => handleSort('employeeId')}
                     >
-                      Assigned To
+                      Assigned to
                     </TableSortLabel>
                   </TableCell>
                   <TableCell sortDirection={orderBy === 'status' ? order : false}>
@@ -347,7 +347,7 @@ const TicketList = () => {
                       direction={orderBy === 'updatedAt' ? order : 'desc'}
                       onClick={() => handleSort('updatedAt')}
                     >
-                      Last Updated
+                      Last updated
                     </TableSortLabel>
                   </TableCell>
                 </TableRow>

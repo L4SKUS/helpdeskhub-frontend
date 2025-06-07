@@ -33,6 +33,7 @@ import {
 import { updateTicket } from '../services/ticketService';
 import { getCurrentUser } from '../services/authService';
 import { getEmployees, getUser } from '../services/userService';
+import { notifyStatusChanged, notifyEmployeeAssigned } from '../services/notificationService';
 import CommentList from './CommentList';
 
 const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => {
@@ -81,20 +82,42 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
   };
 
   const handleSave = async () => {
-    setLoading(true);
-    try {
-      const updateData = {
-        title: ticket.title,
-        description: ticket.description,
-        priority: ticket.priority
-      };
+  setLoading(true);
+  try {
+    const previousStatus = initialTicket.status;
+    const previousEmployeeId = initialTicket.employeeId;
 
-      if (currentUser.role !== 'CLIENT') {
-        updateData.status = ticket.status;
-        updateData.employeeId = ticket.employeeId ? parseInt(ticket.employeeId) : null;
-      }
+    const updateData = {
+      title: ticket.title,
+      description: ticket.description,
+      priority: ticket.priority
+    };
 
-      const updatedTicket = await updateTicket(ticket.id, updateData);
+    if (currentUser.role !== 'CLIENT') {
+      updateData.status = ticket.status;
+      updateData.employeeId = ticket.employeeId === '' ? null : parseInt(ticket.employeeId);
+    }
+
+    const updatedTicket = await updateTicket(ticket.id, updateData);
+
+    if (updateData.status && updateData.status !== previousStatus) {
+      notifyStatusChanged({
+        recipient: client?.email,
+        ticketId: updatedTicket.id,
+        ticketTitle: updatedTicket.title,
+        status: updatedTicket.status
+      }).catch(console.error);
+    }
+
+    if (updateData.employeeId && updateData.employeeId !== previousEmployeeId) {
+      notifyEmployeeAssigned({
+        recipient: client?.email,
+        ticketId: updatedTicket.id,
+        ticketTitle: updatedTicket.title,
+        employeeName: getEmployeeName(updatedTicket.employeeId)
+      }).catch(console.error);
+    }
+
       setTicket(updatedTicket);
       onUpdate(updatedTicket);
       setIsEditing(false);
@@ -294,12 +317,12 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
                 </FormControl>
 
                 <FormControl fullWidth size="small">
-                  <InputLabel>Assign to Employee</InputLabel>
+                  <InputLabel>Assign to employee</InputLabel>
                   <Select
                     name="employeeId"
                     value={ticket.employeeId || ''}
                     onChange={handleChange}
-                    label="Assign to Employee"
+                    label="Assign to employee"
                     disabled={loadingEmployees}
                   >
                     <MenuItem value=""><em>Unassigned</em></MenuItem>
@@ -375,7 +398,6 @@ const TicketDetail = ({ ticket: initialTicket, onBack, onUpdate, onDelete }) => 
         )}
       </Paper>
 
-      {/* Comments Sidebar */}
       <Paper elevation={3} sx={{ width: 400, p: 3, borderRadius: 2, height: 'fit-content' }}>
         <CommentList ticketId={ticket.id} />
       </Paper>

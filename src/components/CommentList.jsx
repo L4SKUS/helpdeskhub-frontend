@@ -22,6 +22,8 @@ import {
 } from '../services/commentService';
 import { getCurrentUser } from '../services/authService';
 import { getUserById } from '../services/userService';
+import { getTicketById } from '../services/ticketService';
+import { notifyNewComment } from '../services/notificationService';
 
 const CommentList = ({ ticketId }) => {
   const [comments, setComments] = useState([]);
@@ -79,11 +81,7 @@ const CommentList = ({ ticketId }) => {
             newUsers[userId] = userData;
           } catch (err) {
             console.error(`Failed to fetch user ${userId}:`, err);
-            newUsers[userId] = { 
-              id: userId, 
-              firstName: 'User', 
-              lastName: userId 
-            };
+            newUsers[userId] = { id: userId, firstName: 'User', lastName: userId };
           }
         }
       }));
@@ -109,13 +107,34 @@ const CommentList = ({ ticketId }) => {
     if (!newComment.trim()) return;
     try {
       setLoading(prev => ({ ...prev, action: true }));
-      await createComment({
+      const createdComment = await createComment({
         content: newComment,
         ticketId,
         authorId: currentUser.id
       });
       setNewComment('');
       await fetchComments();
+
+      const ticket = await getTicketById(ticketId);
+
+      let recipientEmail;
+
+      if (currentUser.role === 'CLIENT') {
+        const employee = await getUserById(ticket.employeeId);
+        recipientEmail = employee?.email;
+      } else {
+        const client = await getUserById(ticket.clientId);
+        recipientEmail = client?.email;
+      }
+
+      notifyNewComment({
+        recipient: recipientEmail,
+        ticketId,
+        ticketTitle: ticket.title,
+        commentText: createdComment.content
+      }).catch(console.error);
+      
+
     } catch (error) {
       console.error('Failed to post comment:', error);
       setError('Failed to post comment. Please try again.');
@@ -304,10 +323,7 @@ const CommentList = ({ ticketId }) => {
         </Button>
       </Box>
 
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteCancel}
-      >
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
         <DialogTitle>
           {isAdmin && commentToDelete?.authorId !== currentUser.id 
             ? "Admin: Delete User Comment" 

@@ -71,11 +71,11 @@ const Sidebar = ({ filters, setFilters, employees }) => {
       </FormControl>
 
       <FormControl fullWidth margin="normal">
-        <InputLabel>Assigned Employee</InputLabel>
+        <InputLabel>Assigned employee</InputLabel>
         <Select
           name="employeeId"
           value={filters.employeeId}
-          label="Assigned Employee"
+          label="Assigned employee"
           onChange={handleChange}
         >
           <MenuItem value="">All</MenuItem>
