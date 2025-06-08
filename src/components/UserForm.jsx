@@ -13,37 +13,50 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
   const isEdit = Boolean(user);
 
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', phoneNumber: '',
-    passwordHash: '', role: 'CLIENT'
-  });
+  firstName: '', lastName: '', email: '', phoneNumber: '',
+  passwordHash: '', role: 'CLIENT'
+});
 
-  useEffect(() => {
-    if (user) {
-      setFormData({ ...user, password: '' });
-    } else {
-      setFormData({
-        firstName: '', lastName: '', email: '',
-        phoneNumber: '', passwordHash: '', role: 'CLIENT'
-      });
-    }
-  }, [user]);
+const [password, setPassword] = useState('');
 
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+useEffect(() => {
+  if (user) {
+    setFormData({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      phoneNumber: user.phoneNumber || '',
+      passwordHash: user.passwordHash || '',
+      role: user.role || 'CLIENT'
+    });
+    setPassword('');
+  } else {
+    setFormData({
+      firstName: '', lastName: '', email: '', phoneNumber: '',
+      passwordHash: '', role: 'CLIENT'
+    });
+    setPassword('');
+  }
+}, [user]);
 
-  const handleSubmit = async () => {
-    const cleanedData = { ...formData };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  if (name === 'password') {
+    setPassword(value);
+  } else {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+};
 
-    if (cleanedData.password.trim()) {
-      const passwordHash = await bcrypt.hash(cleanedData.password, FIXED_SALT);
-      cleanedData.passwordHash = passwordHash;
-    }
+const handleSubmit = async () => {
+  const cleanedData = { ...formData };
+  if (password.trim()) {
+    const passwordHash = await bcrypt.hash(password, FIXED_SALT);
+    cleanedData.passwordHash = passwordHash;
+  }
+  onSubmit(cleanedData);
+};
 
-    delete cleanedData.password;
-
-    onSubmit(cleanedData);
-  };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth>
