@@ -46,17 +46,30 @@ const UserManagement = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    await fetchUsers();
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   useEffect(() => {
     let result = [...users];
+
     if (filters.role) {
       result = result.filter(user => user.role === filters.role);
     }
+
+    result.sort((a, b) => {
+      const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+      const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
     setFilteredUsers(result);
   }, [users, filters]);
+
 
   const handleFormSubmit = async (data) => {
     try {
@@ -140,10 +153,10 @@ const UserManagement = () => {
           variant="outlined"
           fullWidth
           startIcon={<Refresh />}
-          onClick={fetchUsers}
+          onClick={() => setFilters({ role: '' })}
           sx={{ textTransform: 'none' }}
         >
-          Refresh
+          RESET FILTERS
         </Button>
       </Paper>
 
@@ -153,17 +166,30 @@ const UserManagement = () => {
             User Management
           </Typography>
           
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => {
-              setSelectedUser(null);
-              setFormOpen(true);
-            }}
-            sx={{ textTransform: 'none' }}
-          >
-            Add User
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <IconButton
+              onClick={handleRefresh}
+              title="Refresh"
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1
+              }}
+            >
+              <Refresh fontSize="small" />
+            </IconButton>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => {
+                setSelectedUser(null);
+                setFormOpen(true);
+              }}
+              sx={{ textTransform: 'none' }}
+            >
+              Add User
+            </Button>
+          </Stack>
         </Box>
 
         {error && (

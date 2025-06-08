@@ -54,13 +54,11 @@ const UserForm = ({ open, onClose, onSubmit, user }) => {
         <TextField fullWidth margin="dense" name="email" label="Email" value={formData.email} onChange={handleChange} />
         <TextField fullWidth margin="dense" name="phoneNumber" label="Phone Number" value={formData.phoneNumber} onChange={handleChange} />
         <TextField fullWidth margin="dense" name="password" label="Password" type="password" value={formData.password} onChange={handleChange} />
-        {!isEdit && (
-          <TextField select fullWidth margin="dense" name="role" label="Role" value={formData.role} onChange={handleChange}>
-            {roles.map(role => (
-              <MenuItem key={role} value={role}>{role}</MenuItem>
-            ))}
-          </TextField>
-        )}
+        <TextField select fullWidth margin="dense" name="role" label="Role" value={formData.role} onChange={handleChange}>
+          {roles.map(role => (
+            <MenuItem key={role} value={role}>{role}</MenuItem>
+          ))}
+        </TextField>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
