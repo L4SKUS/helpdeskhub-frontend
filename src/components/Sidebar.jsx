@@ -51,7 +51,7 @@ const Sidebar = ({ filters, setFilters, employees }) => {
         >
           <MenuItem value="">All</MenuItem>
           <MenuItem value="OPEN">Open</MenuItem>
-          <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+          <MenuItem value="IN_PROGRESS">In progress</MenuItem>
         </Select>
       </FormControl>
 
@@ -79,7 +79,6 @@ const Sidebar = ({ filters, setFilters, employees }) => {
           onChange={handleChange}
         >
           <MenuItem value="">All</MenuItem>
-          <MenuItem value={null}>Unassigned</MenuItem>
           {employees.map(employee => (
             <MenuItem key={employee.id} value={employee.id}>
               {employee.firstName} {employee.lastName}

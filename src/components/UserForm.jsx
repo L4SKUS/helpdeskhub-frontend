@@ -60,7 +60,7 @@ const handleSubmit = async () => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth>
-      <DialogTitle>{isEdit ? 'Edit User' : 'Create User'}</DialogTitle>
+      <DialogTitle>{isEdit ? 'Edit User' : 'Add User'}</DialogTitle>
       <DialogContent>
         <TextField fullWidth margin="dense" name="firstName" label="First Name" value={formData.firstName} onChange={handleChange} />
         <TextField fullWidth margin="dense" name="lastName" label="Last Name" value={formData.lastName} onChange={handleChange} />
