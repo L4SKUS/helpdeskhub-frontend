@@ -29,13 +29,13 @@ useEffect(() => {
       passwordHash: user.passwordHash || '',
       role: user.role || 'CLIENT'
     });
-    setPassword('');
+    setPassword(null);
   } else {
     setFormData({
       firstName: '', lastName: '', email: '', phoneNumber: '',
       passwordHash: '', role: 'CLIENT'
     });
-    setPassword('');
+    setPassword(null);
   }
 }, [user]);
 
