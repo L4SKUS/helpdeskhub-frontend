@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const API_URL = 'http://localhost:8081/api/users';
-const API_URL = 'http://k8s-default-ingressa-9b8ecfc4db-1680425954.eu-central-1.elb.amazonaws.com/api/users'
+const API_URL = 'http://k8s-default-ingressa-9b8ecfc4db-1237375805.eu-central-1.elb.amazonaws.com/api/users'
 
 const api = axios.create();
 

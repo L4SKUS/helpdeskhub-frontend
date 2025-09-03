@@ -1,5 +1,5 @@
 //const API_URL = 'http://localhost:8083/api/auth';
-const API_URL = 'http://k8s-default-ingressa-9b8ecfc4db-1680425954.eu-central-1.elb.amazonaws.com/api/auth'
+const API_URL = 'http://k8s-default-ingressa-9b8ecfc4db-1237375805.eu-central-1.elb.amazonaws.com/api/auth'
 
 export const login = async (credentials) => {
   try {
